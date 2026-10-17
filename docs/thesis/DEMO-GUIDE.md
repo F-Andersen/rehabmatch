@@ -2,8 +2,8 @@
 
 ## Підготовка
 
-1. `npm run db:up` → `npm run db:migrate` → `npm run db:seed`
-2. `npm run dev` (client + server)
+1. **Захист (рекомендовано):** `npm run showcase:prepare` → `npm run showcase:seed` → `npm run dev:showcase` (БД `rehabmatch_showcase`, див. `SHOWCASE-DATABASE.md`).
+2. **Класична demo БД:** `npm run db:up` → `npm run db:migrate` → `npm run db:seed` → `npm run dev`.
 3. Облікові записи: admin з seed (email у `.env`, пароль не публікувати); новий PATIENT/SPECIALIST через UI.
 
 ## Послідовність (15 кроків)
