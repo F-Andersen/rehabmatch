@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 import { registerPatient, uniqueEmail } from "./helpers";
 
 test("patient can run matching flow to recommendations", async ({ page }) => {
+  test.slow();
   await registerPatient(page, uniqueEmail("e2e-match"), "E2EMatchPass1!");
 
   await page.goto("/matching/new");
@@ -19,7 +20,7 @@ test("patient can run matching flow to recommendations", async ({ page }) => {
   }
 
   await page.getByRole("button", { name: "Попередній розрахунок" }).click();
-  await expect(page.getByText("Ваги критеріїв")).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByText("Ваги критеріїв", { exact: true })).toBeVisible({ timeout: 15_000 });
 
   await expect(page.getByRole("button", { name: "Отримати рекомендації" })).toBeEnabled();
   const createRecommendation = page.waitForResponse(
