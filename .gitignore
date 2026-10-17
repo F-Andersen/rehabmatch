@@ -8,6 +8,8 @@ build/
 coverage/
 test-results/
 playwright-report/
+blob-report/
+playwright-report/
 *.log
 .DS_Store
 .idea/
