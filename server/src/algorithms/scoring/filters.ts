@@ -15,6 +15,13 @@ export function passesHardFilters(
     return false;
   }
 
+  if (
+    filters.specializationId &&
+    !specialist.specializationIds.includes(filters.specializationId)
+  ) {
+    return false;
+  }
+
   if (filters.maxBudget !== undefined && specialist.pricePerSession > filters.maxBudget) {
     return false;
   }

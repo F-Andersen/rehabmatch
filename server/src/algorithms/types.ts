@@ -18,6 +18,7 @@ export type PairwiseComparison = {
 
 export type RecommendationFilters = {
   injuryTypeId?: string;
+  specializationId?: string;
   maxBudget?: number;
   cityId?: string | null;
   districtId?: string | null;
@@ -37,6 +38,7 @@ export type ScoringSpecialist = {
   districtId: string | null;
   formatIds: string[];
   injuryTypeIds: string[];
+  specializationIds: string[];
   inclusiveSpace: boolean;
   verificationStatus?: string;
   isVisible?: boolean;

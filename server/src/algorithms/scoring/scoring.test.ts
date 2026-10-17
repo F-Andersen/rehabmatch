@@ -33,6 +33,7 @@ function specialist(
     districtId: null,
     formatIds: ["fmt-1"],
     injuryTypeIds: ["inj-1"],
+    specializationIds: [],
     inclusiveSpace: false,
     verificationStatus: "APPROVED",
     isVisible: true,
