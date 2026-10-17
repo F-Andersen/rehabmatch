@@ -1,0 +1,212 @@
+[
+  {
+    "id": "DEMO-PRICE",
+    "label": "Низька вартість у пріоритеті",
+    "mode": "AHP_PAIRWISE",
+    "city": "Київ",
+    "injuryType": "Спортивні травми",
+    "maxBudgetUah": 2000,
+    "comparisons": [
+      {
+        "criterionA": "EXPERIENCE",
+        "criterionB": "PRICE",
+        "value": 0.125
+      },
+      {
+        "criterionA": "EXPERIENCE",
+        "criterionB": "RATING",
+        "value": 0.5
+      },
+      {
+        "criterionA": "EXPERIENCE",
+        "criterionB": "LOCATION",
+        "value": 1.0
+      },
+      {
+        "criterionA": "EXPERIENCE",
+        "criterionB": "FORMAT",
+        "value": 1.0
+      },
+      {
+        "criterionA": "PRICE",
+        "criterionB": "RATING",
+        "value": 4.0
+      },
+      {
+        "criterionA": "PRICE",
+        "criterionB": "LOCATION",
+        "value": 8.0
+      },
+      {
+        "criterionA": "PRICE",
+        "criterionB": "FORMAT",
+        "value": 8.0
+      },
+      {
+        "criterionA": "RATING",
+        "criterionB": "LOCATION",
+        "value": 2.0
+      },
+      {
+        "criterionA": "RATING",
+        "criterionB": "FORMAT",
+        "value": 2.0
+      },
+      {
+        "criterionA": "LOCATION",
+        "criterionB": "FORMAT",
+        "value": 1.0
+      }
+    ],
+    "expected": {
+      "weights": {
+        "EXPERIENCE": 0.07692307692307693,
+        "PRICE": 0.6153846153846154,
+        "RATING": 0.15384615384615385,
+        "LOCATION": 0.07692307692307693,
+        "FORMAT": 0.07692307692307693
+      },
+      "cr": 0
+    }
+  },
+  {
+    "id": "DEMO-EXPERIENCE",
+    "label": "Досвід важливіший за ціну",
+    "mode": "AHP_PAIRWISE",
+    "city": "Львів",
+    "injuryType": "Післяопераційне відновлення",
+    "maxBudgetUah": 2500,
+    "comparisons": [
+      {
+        "criterionA": "EXPERIENCE",
+        "criterionB": "PRICE",
+        "value": 8.0
+      },
+      {
+        "criterionA": "EXPERIENCE",
+        "criterionB": "RATING",
+        "value": 4.0
+      },
+      {
+        "criterionA": "EXPERIENCE",
+        "criterionB": "LOCATION",
+        "value": 8.0
+      },
+      {
+        "criterionA": "EXPERIENCE",
+        "criterionB": "FORMAT",
+        "value": 8.0
+      },
+      {
+        "criterionA": "PRICE",
+        "criterionB": "RATING",
+        "value": 0.5
+      },
+      {
+        "criterionA": "PRICE",
+        "criterionB": "LOCATION",
+        "value": 1.0
+      },
+      {
+        "criterionA": "PRICE",
+        "criterionB": "FORMAT",
+        "value": 1.0
+      },
+      {
+        "criterionA": "RATING",
+        "criterionB": "LOCATION",
+        "value": 2.0
+      },
+      {
+        "criterionA": "RATING",
+        "criterionB": "FORMAT",
+        "value": 2.0
+      },
+      {
+        "criterionA": "LOCATION",
+        "criterionB": "FORMAT",
+        "value": 1.0
+      }
+    ],
+    "expected": {
+      "weights": {
+        "EXPERIENCE": 0.6153846153846154,
+        "PRICE": 0.07692307692307693,
+        "RATING": 0.15384615384615385,
+        "LOCATION": 0.07692307692307693,
+        "FORMAT": 0.07692307692307693
+      },
+      "cr": 0
+    }
+  },
+  {
+    "id": "DEMO-EQUAL",
+    "label": "Рівні важливості критеріїв",
+    "mode": "AHP_PAIRWISE",
+    "city": "Одеса",
+    "injuryType": "Неврологічна реабілітація",
+    "maxBudgetUah": 2600,
+    "comparisons": [
+      {
+        "criterionA": "EXPERIENCE",
+        "criterionB": "PRICE",
+        "value": 1.0
+      },
+      {
+        "criterionA": "EXPERIENCE",
+        "criterionB": "RATING",
+        "value": 1.0
+      },
+      {
+        "criterionA": "EXPERIENCE",
+        "criterionB": "LOCATION",
+        "value": 1.0
+      },
+      {
+        "criterionA": "EXPERIENCE",
+        "criterionB": "FORMAT",
+        "value": 1.0
+      },
+      {
+        "criterionA": "PRICE",
+        "criterionB": "RATING",
+        "value": 1.0
+      },
+      {
+        "criterionA": "PRICE",
+        "criterionB": "LOCATION",
+        "value": 1.0
+      },
+      {
+        "criterionA": "PRICE",
+        "criterionB": "FORMAT",
+        "value": 1.0
+      },
+      {
+        "criterionA": "RATING",
+        "criterionB": "LOCATION",
+        "value": 1.0
+      },
+      {
+        "criterionA": "RATING",
+        "criterionB": "FORMAT",
+        "value": 1.0
+      },
+      {
+        "criterionA": "LOCATION",
+        "criterionB": "FORMAT",
+        "value": 1.0
+      }
+    ],
+    "expected": {
+      "weights": {
+        "EXPERIENCE": 0.2,
+        "PRICE": 0.2,
+        "RATING": 0.2,
+        "LOCATION": 0.2,
+        "FORMAT": 0.2
+      },
+      "cr": 0
+    }
+  }
+]

@@ -1,0 +1,5 @@
+---
+description: RehabMatch MVP project architecture, task workflow and non-negotiables
+alwaysApply: true
+---
+You work on RehabMatch, a Ukrainian-language educational MVP for ranking rehabilitation specialists. First read `AGENTS.md`, `docs/01-PRODUCT-REQUIREMENTS.md`, `docs/04-AHP-ALGORITHM.md`, `docs/10-SOURCE-MAPPING-AND-DECISIONS.md`. Work incrementally according to `docs/08-IMPLEMENTATION-PLAN.md`. Do not claim anything is implemented without running and checking it. Never represent recommendations as medical treatment advice. All demo clinicians must be explicitly fictional. Keep `docs/IMPLEMENTATION-STATUS.md` updated as you work (create on milestone 0). Any change in scope requires written justification and owner approval.

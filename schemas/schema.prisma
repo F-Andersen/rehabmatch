@@ -1,0 +1,284 @@
+// RehabMatch proposed logical Prisma schema. Cursor: adapt datasource configuration
+// to the installed Prisma major version, then run prisma validate/migrations.
+// This is a design handoff, not evidence that migrations have been executed.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole { PATIENT SPECIALIST ADMIN }
+enum SpecialistStatus { PENDING APPROVED REJECTED }
+enum CriterionKey { EXPERIENCE PRICE RATING LOCATION FORMAT }
+enum CriterionType { BENEFIT COST MATCH }
+enum PreferenceMode { AHP_PAIRWISE DIRECT_WSM }
+enum RecommendationStatus { COMPLETE FAILED }
+enum ReviewStatus { PENDING APPROVED REJECTED }
+enum AppointmentRequestStatus { REQUESTED ACCEPTED DECLINED CANCELLED }
+
+model User {
+  id            String     @id @default(uuid()) @db.Uuid
+  fullName      String
+  email         String     @unique
+  phone         String?
+  passwordHash  String
+  role          UserRole
+  isActive      Boolean    @default(true)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  patient       Patient?
+  specialist    Specialist?
+  sessions      Session[]
+}
+
+model Session {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @db.Uuid
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash   String   @unique
+  expiresAt   DateTime
+  revokedAt   DateTime?
+  createdAt   DateTime @default(now())
+  @@index([userId, expiresAt])
+}
+
+model Patient {
+  id                  String               @id @default(uuid()) @db.Uuid
+  userId              String               @unique @db.Uuid
+  user                User                 @relation(fields: [userId], references: [id])
+  cityId              String?              @db.Uuid
+  city                City?                @relation(fields: [cityId], references: [id])
+  searchRequests      SearchRequest[]
+  reviews             Review[]
+  appointmentRequests AppointmentRequest[]
+}
+
+model Specialist {
+  id                  String                        @id @default(uuid()) @db.Uuid
+  userId              String                        @unique @db.Uuid
+  user                User                          @relation(fields: [userId], references: [id])
+  cityId              String                        @db.Uuid
+  city                City                          @relation(fields: [cityId], references: [id])
+  districtId          String?                       @db.Uuid
+  district            District?                     @relation(fields: [districtId], references: [id])
+  experienceYears     Int                           @default(0)
+  pricePerSession     Decimal                       @db.Decimal(10, 2)
+  description         String                        @default("")
+  photoUrl            String?
+  inclusiveSpace      Boolean                       @default(false)
+  verificationStatus  SpecialistStatus              @default(PENDING)
+  verifiedAt          DateTime?
+  isDemo              Boolean                       @default(false)
+  isVisible           Boolean                       @default(true)
+  ratingAvg           Float?
+  ratingCount         Int                           @default(0)
+  createdAt           DateTime                      @default(now())
+  updatedAt           DateTime                      @updatedAt
+  specializations     SpecialistSpecialization[]
+  injuryTypes         SpecialistInjuryType[]
+  appointmentFormats  SpecialistAppointmentFormat[]
+  services            Service[]
+  reviews             Review[]
+  recommendationItems RecommendationItem[]
+  appointmentRequests AppointmentRequest[]
+  @@index([verificationStatus, isVisible])
+  @@index([cityId, pricePerSession])
+  @@index([experienceYears])
+}
+
+model Specialization {
+  id          String                      @id @default(uuid()) @db.Uuid
+  name        String                      @unique
+  description String?
+  specialists SpecialistSpecialization[]
+}
+
+model SpecialistSpecialization {
+  specialistId     String         @db.Uuid
+  specializationId String         @db.Uuid
+  specialist       Specialist     @relation(fields: [specialistId], references: [id], onDelete: Cascade)
+  specialization   Specialization @relation(fields: [specializationId], references: [id])
+  @@id([specialistId, specializationId])
+}
+
+model City {
+  id             String          @id @default(uuid()) @db.Uuid
+  name           String          @unique
+  districts      District[]
+  specialists    Specialist[]
+  patients       Patient[]
+  searchRequests SearchRequest[]
+}
+
+model District {
+  id             String          @id @default(uuid()) @db.Uuid
+  cityId         String          @db.Uuid
+  city           City            @relation(fields: [cityId], references: [id])
+  name           String
+  specialists    Specialist[]
+  searchRequests SearchRequest[]
+  @@unique([cityId, name])
+}
+
+model InjuryType {
+  id             String                 @id @default(uuid()) @db.Uuid
+  name           String                 @unique
+  description    String?
+  specialists    SpecialistInjuryType[]
+  searchRequests SearchRequest[]
+}
+
+model SpecialistInjuryType {
+  specialistId String     @db.Uuid
+  injuryTypeId String     @db.Uuid
+  specialist   Specialist @relation(fields: [specialistId], references: [id], onDelete: Cascade)
+  injuryType   InjuryType @relation(fields: [injuryTypeId], references: [id])
+  @@id([specialistId, injuryTypeId])
+}
+
+model AppointmentFormat {
+  id             String                        @id @default(uuid()) @db.Uuid
+  name           String                        @unique
+  specialists    SpecialistAppointmentFormat[]
+  searchRequests SearchRequest[]
+}
+
+model SpecialistAppointmentFormat {
+  specialistId String            @db.Uuid
+  formatId     String            @db.Uuid
+  specialist   Specialist        @relation(fields: [specialistId], references: [id], onDelete: Cascade)
+  format       AppointmentFormat @relation(fields: [formatId], references: [id])
+  @@id([specialistId, formatId])
+}
+
+model Service {
+  id           String     @id @default(uuid()) @db.Uuid
+  specialistId String     @db.Uuid
+  specialist   Specialist @relation(fields: [specialistId], references: [id], onDelete: Cascade)
+  name         String
+  description  String?
+  price        Decimal    @db.Decimal(10, 2)
+  isActive     Boolean    @default(true)
+  @@index([specialistId])
+}
+
+model SearchRequest {
+  id               String               @id @default(uuid()) @db.Uuid
+  patientId        String               @db.Uuid
+  patient          Patient              @relation(fields: [patientId], references: [id])
+  injuryTypeId     String               @db.Uuid
+  injuryType       InjuryType           @relation(fields: [injuryTypeId], references: [id])
+  cityId           String?              @db.Uuid
+  city             City?                @relation(fields: [cityId], references: [id])
+  districtId       String?              @db.Uuid
+  district         District?            @relation(fields: [districtId], references: [id])
+  formatId         String?              @db.Uuid
+  format           AppointmentFormat?   @relation(fields: [formatId], references: [id])
+  maxBudget        Decimal              @db.Decimal(10, 2)
+  cityOnly         Boolean              @default(false)
+  inclusiveOnly    Boolean              @default(false)
+  radiusKm         Float?               // reserved, NOT implemented in MVP UI
+  preferenceMode   PreferenceMode
+  consistencyRatio Float?
+  filtersSnapshot  Json
+  createdAt        DateTime             @default(now())
+  priorities       CriterionPriority[]
+  comparisons      CriterionComparison[]
+  recommendations  Recommendation[]
+  @@index([patientId, createdAt])
+}
+
+model Criterion {
+  id              String                @id @default(uuid()) @db.Uuid
+  key             CriterionKey          @unique
+  name            String
+  description     String?
+  criterionType   CriterionType
+  isActive        Boolean               @default(true)
+  priorities      CriterionPriority[]
+  comparisonsAsA  CriterionComparison[] @relation("criterionA")
+  comparisonsAsB  CriterionComparison[] @relation("criterionB")
+}
+
+model CriterionPriority {
+  id              String        @id @default(uuid()) @db.Uuid
+  searchRequestId String        @db.Uuid
+  criterionId     String        @db.Uuid
+  rawValue        Float?
+  weight          Float
+  searchRequest   SearchRequest @relation(fields: [searchRequestId], references: [id], onDelete: Cascade)
+  criterion       Criterion     @relation(fields: [criterionId], references: [id])
+  @@unique([searchRequestId, criterionId])
+}
+
+model CriterionComparison {
+  id              String        @id @default(uuid()) @db.Uuid
+  searchRequestId String        @db.Uuid
+  criterionAId    String        @db.Uuid
+  criterionBId    String        @db.Uuid
+  value           Float
+  searchRequest   SearchRequest @relation(fields: [searchRequestId], references: [id], onDelete: Cascade)
+  criterionA      Criterion     @relation("criterionA", fields: [criterionAId], references: [id])
+  criterionB      Criterion     @relation("criterionB", fields: [criterionBId], references: [id])
+  @@unique([searchRequestId, criterionAId, criterionBId])
+}
+
+model Recommendation {
+  id               String               @id @default(uuid()) @db.Uuid
+  searchRequestId  String               @db.Uuid
+  searchRequest    SearchRequest        @relation(fields: [searchRequestId], references: [id])
+  method           PreferenceMode
+  algorithmVersion String
+  status           RecommendationStatus @default(COMPLETE)
+  weightsSnapshot  Json
+  createdAt        DateTime             @default(now())
+  items            RecommendationItem[]
+  @@index([searchRequestId, createdAt])
+}
+
+model RecommendationItem {
+  id                String         @id @default(uuid()) @db.Uuid
+  recommendationId  String         @db.Uuid
+  specialistId      String         @db.Uuid
+  recommendation    Recommendation @relation(fields: [recommendationId], references: [id], onDelete: Cascade)
+  specialist        Specialist     @relation(fields: [specialistId], references: [id])
+  rankPosition      Int
+  matchScore        Float
+  scoreBreakdown    Json
+  explanation       Json
+  @@unique([recommendationId, specialistId])
+  @@unique([recommendationId, rankPosition])
+}
+
+model Review {
+  id           String       @id @default(uuid()) @db.Uuid
+  patientId    String       @db.Uuid
+  specialistId String       @db.Uuid
+  patient      Patient      @relation(fields: [patientId], references: [id])
+  specialist   Specialist   @relation(fields: [specialistId], references: [id])
+  rating       Int
+  comment      String
+  status       ReviewStatus @default(PENDING)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  @@unique([patientId, specialistId])
+  @@index([specialistId, status])
+}
+
+model AppointmentRequest {
+  id           String                   @id @default(uuid()) @db.Uuid
+  patientId    String                   @db.Uuid
+  specialistId String                   @db.Uuid
+  patient      Patient                  @relation(fields: [patientId], references: [id])
+  specialist   Specialist               @relation(fields: [specialistId], references: [id])
+  preferredAt  DateTime
+  status       AppointmentRequestStatus @default(REQUESTED)
+  note         String?
+  createdAt    DateTime                 @default(now())
+  updatedAt    DateTime                 @updatedAt
+  @@index([specialistId, status])
+  @@index([patientId, createdAt])
+}

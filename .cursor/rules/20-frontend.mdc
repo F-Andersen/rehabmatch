@@ -1,0 +1,11 @@
+---
+description: RehabMatch React page designs, accessibility and real API integration
+alwaysApply: false
+globs: ["client/**"]
+---
+- Read `docs/05-DESIGN-SYSTEM.md` and the corresponding image `design/reference/A*.png` before creating each UI.
+- Use React+TypeScript, accessible and responsive layout; Tailwind and shadcn/ui if compatible with current versions.
+- All actions must call actual API or present an honestly disabled explanatory state. No fake completion states.
+- Provide loading, empty, validation, unauthorized and network error states on key screens.
+- An AHP pairwise wizard and CR validation are mandatory; read-only summary bars may echo the A.4 reference. Direct-weight sliders must clearly indicate separate WSM quick mode.
+- Preserve the document visual language (white surfaces, blue accent, soft shadows, desktop filter sidebar and mobile drawer) without reusing source screenshot as a clickable page.

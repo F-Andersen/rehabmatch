@@ -1,0 +1,44 @@
+{
+  "source": "Synthetic numerical reference for AHP geometric-mean estimator; not a clinical recommendation",
+  "criteria": [
+    "C1",
+    "C2",
+    "C3"
+  ],
+  "matrix": [
+    [
+      1,
+      0.3333333333333333,
+      3
+    ],
+    [
+      3,
+      1,
+      5
+    ],
+    [
+      0.3333333333333333,
+      0.2,
+      1
+    ]
+  ],
+  "expected": {
+    "weights": [
+      0.25828499,
+      0.63698557,
+      0.10472943
+    ],
+    "lambdaMax": 3.03851109,
+    "ci": 0.019255545,
+    "cr": 0.033199216
+  },
+  "tolerances": {
+    "weights": 1e-05,
+    "cr": 0.0001
+  },
+  "ri": {
+    "3": 0.58,
+    "4": 0.9,
+    "5": 1.12
+  }
+}

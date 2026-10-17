@@ -1,0 +1,12 @@
+---
+description: Requirements for Express, Prisma, auth, API, algorithms and test coverage
+alwaysApply: false
+globs: ["server/**", "schemas/**"]
+---
+- API contract: `docs/06-API-CONTRACT.md`.
+- Validate body and query parameters with Zod. Make response shapes and status codes consistent.
+- DB interactions via Prisma only; use migrations; document seed and reset commands.
+- Never query PostgreSQL from the browser; never trust `role`, `patientId`, or `verified` fields supplied by the client.
+- Isolate AHP and scoring into pure functions with independent unit tests and strict numerical validation (positive reciprocal matrix, CR, NaN, zero denominator, missing scores).
+- Protect all mutation routes with session, CSRF/origin strategy and server-side access checks; use transactions for linked writes.
+- Append versioned algorithm metadata to saved recommendations and ensure deterministic tie-breaking.

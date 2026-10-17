@@ -1,0 +1,15 @@
+node_modules/
+.env
+.env.*
+!.env.example
+client/dist/
+server/dist/
+build/
+coverage/
+test-results/
+playwright-report/
+*.log
+.DS_Store
+.idea/
+# Academic source documents and screenshot references are intentionally included
+# in the handoff; review privacy before pushing to a public Git repository.
