@@ -1,0 +1,40 @@
+openapi: 3.0.3
+info:
+  title: RehabMatch API
+  version: 1.0.0
+paths:
+  /api/v1/specialists/{id}/reviews:
+    get:
+      summary: Public approved reviews
+    post:
+      summary: Patient create or update review (PENDING)
+  /api/v1/appointment-requests:
+    post:
+      summary: Patient create consultation request
+  /api/v1/me/appointment-requests:
+    get:
+      summary: Patient list own requests
+  /api/v1/me/appointment-requests/{id}/cancel:
+    patch:
+      summary: Patient cancel REQUESTED request
+  /api/v1/specialist/appointment-requests:
+    get:
+      summary: Specialist incoming requests
+  /api/v1/specialist/appointment-requests/{id}/status:
+    patch:
+      summary: Specialist accept or decline
+  /api/v1/admin/reviews:
+    get:
+      summary: Admin moderation queue
+  /api/v1/admin/reviews/{id}/status:
+    patch:
+      summary: Admin approve or reject review
+  /api/v1/admin/appointment-requests:
+    get:
+      summary: Admin audit list
+  /api/v1/admin/users:
+    get:
+      summary: Admin user list
+  /api/v1/admin/users/{id}/status:
+    patch:
+      summary: Admin activate or deactivate user
