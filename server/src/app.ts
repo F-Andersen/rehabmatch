@@ -13,6 +13,7 @@ import { patientRouter } from "./routes/v1/patient.js";
 import { catalogRouter } from "./routes/v1/catalog.js";
 import { specialistsRouter } from "./routes/v1/specialists.js";
 import { specialistPortalRouter } from "./routes/v1/specialist-portal.js";
+import { ahpRouter } from "./routes/v1/ahp.js";
 
 export function createApp() {
   const app = express();
@@ -38,6 +39,7 @@ export function createApp() {
   app.use("/api/v1", catalogRouter);
   app.use("/api/v1", specialistsRouter);
   app.use("/api/v1/specialist", specialistPortalRouter);
+  app.use("/api/v1/ahp", ahpRouter);
 
   app.use(errorHandler);
 
