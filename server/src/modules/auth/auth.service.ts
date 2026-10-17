@@ -40,15 +40,9 @@ export async function registerUser(input: RegisterInput): Promise<{ user: Sessio
     }
 
     if (input.role === UserRole.SPECIALIST) {
-      const city = await tx.city.findFirst({ where: { name: "Київ" } });
-      if (!city) {
-        throw new AppError(500, "SEED_DATA_MISSING", "Довідник міст недоступний. Запустіть seed.");
-      }
-
       await tx.specialist.create({
         data: {
           userId: created.id,
-          cityId: city.id,
           pricePerSession: new Prisma.Decimal(0),
           verificationStatus: SpecialistStatus.PENDING,
           description: "",
