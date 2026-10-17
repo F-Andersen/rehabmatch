@@ -11,6 +11,7 @@
     "typecheck": "npm run typecheck -w client && npm run typecheck -w server",
     "test": "npm run test --workspaces --if-present",
     "e2e": "playwright test",
+    "e2e:prepare": "npm run e2e:db:prepare -w server",
     "e2e:visual": "playwright test visual-qa",
     "bench:recommendation": "npm run bench:recommendation -w server",
     "openapi:lint": "npx --yes @redocly/cli@1 lint docs/api/openapi.yaml",

@@ -47,8 +47,9 @@ npm run dev
 | `npm run build` | Production build |
 | `npm run typecheck` | TypeScript |
 | `npm test` | Vitest (server) |
-| `npm run e2e` | Playwright (потрібні `dev` сервери) |
-| `npm run e2e:visual` | Скріншоти responsive → `docs/thesis/screenshots/` |
+| `npm run e2e` | Playwright (ізольована БД `rehabmatch_e2e`, піднімає API+client) |
+| `npm run e2e:prepare` | Міграції + seed на E2E БД (див. `.env.e2e.example`) |
+| `npm run e2e:visual` | Smoke-скріншоти → `e2e/artifacts/visual-qa/` |
 | `npm run bench:recommendation` | Benchmark алгоритму (синтетика) |
 | `npm run openapi:lint` | Валідація OpenAPI |
 | `npm run db:validate` | `prisma validate` |
@@ -62,9 +63,11 @@ npm run dev
 
 ## Тестування
 
-1. Запустіть `npm run dev` у одному терміналі.
-2. У іншому: `npm test`, потім `npm run e2e`.
-3. E2E admin-сценарії потребують валідних `SEED_ADMIN_*` у `.env`.
+1. `npm test` — Vitest (локальна demo БД з `.env`).
+2. E2E: `cp .env.e2e.example .env.e2e`, налаштуйте `E2E_DATABASE_URL` → **`rehabmatch_e2e`** (не `rehabmatch`).
+3. `npm run e2e` — global setup створить БД (за потреби), migrate, seed; API з `REHABMATCH_E2E=1` (auth quota для тестів; production ліміт не змінюється).
+4. Демо вручну: `npm run dev` + БД **`rehabmatch`** — E2E її не очищає.
+5. Деталі: `docs/thesis/E2E-ENVIRONMENT.md`, audit: `docs/thesis/DEPENDENCY-AUDIT.md`.
 
 ## Типові проблеми (Windows)
 

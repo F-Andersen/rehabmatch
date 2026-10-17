@@ -1,6 +1,6 @@
 # Результати тестування M7
 
-Фінальний прогін M7 (2026-10-17): **70** Vitest + **35** Playwright (у т.ч. visual на 3 viewport).
+Release stabilization (2026-10-17): **74** Vitest + **37** Playwright × **2** послідовні повні прогони (ізольована БД `rehabmatch_e2e`, порти 3011/5174).
 
 ## Автоматизовані тести (server, Vitest)
 
@@ -13,7 +13,9 @@
 - `auth.spec.ts`, `catalog.spec.ts`, `matching.spec.ts`, `reviews-requests.spec.ts`
 - `full-workflows.spec.ts` — admin approve, WSM, consultation, review moderation
 - `security-workflows.spec.ts` — RBAC UI, logout/session
-- `visual-qa.spec.ts` — скріншоти 375/768/1440 у `screenshots/`
+- `visual-qa.spec.ts` — smoke-скріншоти → `e2e/artifacts/visual-qa/`
+- `visual-app-screens.spec.ts` — дипломні кадри → `docs/thesis/screenshots/`
+- Середовище: `docs/thesis/E2E-ENVIRONMENT.md`
 
 ## Security
 
@@ -22,5 +24,5 @@
 
 ## Обмеження
 
-- E2E залежать від локальних серверів 5173/3001 та `.env` з `SEED_ADMIN_*`.
-- ~95 тестових користувачів у локальній БД (див. `TEST-DATA-AUDIT.md`); seed-дані не видалялись.
+- E2E: `.env.e2e` + `rehabmatch_e2e`; demo БД `rehabmatch` не очищається.
+- Vitest integration лишаються на локальній demo БД з `.env`.

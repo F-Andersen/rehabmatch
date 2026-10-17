@@ -2,11 +2,13 @@ node_modules/
 .env
 .env.*
 !.env.example
+!.env.e2e.example
 client/dist/
 server/dist/
 build/
 coverage/
 test-results/
+e2e/artifacts/
 playwright-report/
 blob-report/
 playwright-report/
