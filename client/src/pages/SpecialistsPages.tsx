@@ -27,7 +27,7 @@ function SpecialistAvatar({ name, photoUrl }: { name: string; photoUrl: string |
     return (
       <img
         src={photoUrl}
-        alt=""
+        alt={`Фото спеціаліста ${name}`}
         className="h-16 w-16 shrink-0 rounded-full object-cover ring-2 ring-surface-tint"
       />
     );
