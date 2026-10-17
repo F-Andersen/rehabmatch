@@ -1,6 +1,6 @@
 # Статус реалізації RehabMatch MVP
 
-Оновлено: **2026-10-17** (M6).
+Оновлено: **2026-10-17** (M7).
 
 | Етап | Статус | Примітки |
 |---|---|---|
@@ -10,42 +10,30 @@
 | M3 — Каталог / модерація | DONE | |
 | M4 — AHP / WSM engine | DONE | |
 | M5 — Персоналізований підбір | DONE | |
-| M6 — Відгуки / заявки / admin | **DONE** | Reviews, AppointmentRequest, розширена `/admin` |
-| M7 | NOT STARTED | |
+| M6 — Відгуки / заявки / admin | DONE | |
+| M7 — QA, docs, thesis demo | **DONE** | E2E, benchmark, OpenAPI, `docs/thesis/` |
 
-## M6 — перевірки (2026-10-17)
+## M7 — перевірки (2026-10-17)
 
 | Перевірка | Результат |
 |---|---|
 | `npm run typecheck` | OK |
-| `npm test` | OK — 69 тестів (включно `m6.integration.test.ts`) |
+| `npm test` | OK — 70 тестів (Vitest) |
 | `npm run build` | OK |
-| `npm run e2e` | OK — 6 тестів |
-| `prisma migrate status` | OK — схема актуальна, нових міграцій M6 не потрібно |
+| `npm run e2e` | OK — Playwright (workflows + security + visual) |
+| `npm run openapi:lint` | OK (`redocly.yaml`) |
+| `npm run db:validate` | OK |
+| `prisma migrate status` | OK (схема актуальна) |
+| `npm run bench:recommendation` | OK → `docs/thesis/benchmark-results.*` |
 
-## API (M6)
+## Документація M7
 
-- `POST /api/v1/specialists/:id/reviews` — відгук пацієнта (PENDING)
-- `GET /api/v1/specialists/:id/reviews/mine` — власний відгук (PATIENT)
-- `GET /api/v1/specialists/:id/reviews` — публічні APPROVED (M3)
-- `POST /api/v1/appointment-requests` — заявка REQUESTED
-- `GET /api/v1/me/appointment-requests` — список пацієнта
-- `PATCH /api/v1/me/appointment-requests/:id/cancel` — CANCELLED
-- `GET /api/v1/specialist/appointment-requests` — вхідні заявки
-- `PATCH /api/v1/specialist/appointment-requests/:id/status` — ACCEPTED / DECLINED
-- `GET /api/v1/admin/users`, `PATCH .../status`
-- `GET /api/v1/admin/reviews`, `PATCH .../status` (+ перерахунок рейтингу)
-- `GET /api/v1/admin/appointment-requests`
-- `GET/POST/PATCH /api/v1/admin/catalog/:type`, `GET/PATCH /api/v1/admin/criteria/:id`
-- `GET /api/v1/admin/summary` — + `pendingReviews`
+- `README.md` — запуск з нуля
+- `docs/api/openapi.yaml` — повна специфікація API
+- `docs/thesis/*` — архітектура, AHP, експерименти, тести, demo guide
+- `docs/M7-CHECKLIST.md`
 
-## Frontend (M6)
+## Відомі обмеження
 
-- Профіль спеціаліста A.6 — рейтинг, відгуки, форма відгуку, запит на консультацію
-- `/my-requests` — заявки пацієнта
-- `/specialist/requests` — обробка заявок спеціалістом
-- `/admin/*` — користувачі, відгуки, заявки, довідники, критерії (модерація спеціалістів збережена)
-
-## OpenAPI
-
-- `docs/api/openapi.yaml` — скелет шляхів M6 (доповнювати разом із наступними етапами)
+- Локальна БД може містити ~95 тестових користувачів (`docs/thesis/TEST-DATA-AUDIT.md`); авто-видалення не виконувалось.
+- `npm audit`: transitive `deepmerge-ts` / `vitest` — без `--force` оновлень у межах MVP.
