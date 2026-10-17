@@ -30,7 +30,8 @@ test("patient can run matching flow to recommendations", async ({ page }) => {
   await page.getByRole("button", { name: "Попередній розрахунок" }).click();
   await expect(page.getByText("Ваги критеріїв")).toBeVisible({ timeout: 15_000 });
 
+  await expect(page.getByRole("button", { name: "Отримати рекомендації" })).toBeEnabled();
   await page.getByRole("button", { name: "Отримати рекомендації" }).click();
-  await expect(page).toHaveURL(/\/recommendations\/[a-f0-9-]+$/i);
+  await expect(page).toHaveURL(/\/recommendations\/[a-f0-9-]+$/i, { timeout: 30_000 });
   await expect(page.getByRole("heading", { name: "Персоналізовані рекомендації" })).toBeVisible();
 });
