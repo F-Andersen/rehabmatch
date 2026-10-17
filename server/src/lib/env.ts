@@ -1,10 +1,27 @@
-import { config } from "dotenv";
+import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { config } from "dotenv";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const moduleDir = path.dirname(fileURLToPath(import.meta.url));
 
-config({ path: path.resolve(__dirname, "../../../.env") });
+function loadEnvFiles(): void {
+  const candidates = [
+    path.resolve(process.cwd(), ".env"),
+    path.resolve(process.cwd(), "..", ".env"),
+    path.resolve(moduleDir, "../../../.env"),
+    path.resolve(moduleDir, "../../../../.env"),
+  ];
+
+  for (const envPath of candidates) {
+    if (existsSync(envPath)) {
+      config({ path: envPath });
+      return;
+    }
+  }
+}
+
+loadEnvFiles();
 
 function readPort(name: string, fallback: number): number {
   const raw = process.env[name];
