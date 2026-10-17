@@ -1,0 +1,130 @@
+[
+  {
+    "id": "SHOWCASE-PRICE",
+    "label": "Пріоритет ціни",
+    "mode": "AHP_PAIRWISE",
+    "city": "Київ",
+    "injuryType": "Спортивні травми",
+    "maxBudgetUah": 2000,
+    "comparisons": [
+      { "criterionA": "EXPERIENCE", "criterionB": "PRICE", "value": 0.125 },
+      { "criterionA": "EXPERIENCE", "criterionB": "RATING", "value": 0.5 },
+      { "criterionA": "EXPERIENCE", "criterionB": "LOCATION", "value": 1.0 },
+      { "criterionA": "EXPERIENCE", "criterionB": "FORMAT", "value": 1.0 },
+      { "criterionA": "PRICE", "criterionB": "RATING", "value": 4.0 },
+      { "criterionA": "PRICE", "criterionB": "LOCATION", "value": 8.0 },
+      { "criterionA": "PRICE", "criterionB": "FORMAT", "value": 8.0 },
+      { "criterionA": "RATING", "criterionB": "LOCATION", "value": 2.0 },
+      { "criterionA": "RATING", "criterionB": "FORMAT", "value": 2.0 },
+      { "criterionA": "LOCATION", "criterionB": "FORMAT", "value": 1.0 }
+    ]
+  },
+  {
+    "id": "SHOWCASE-EXPERIENCE",
+    "label": "Пріоритет досвіду",
+    "mode": "AHP_PAIRWISE",
+    "city": "Львів",
+    "injuryType": "Післяопераційне відновлення",
+    "maxBudgetUah": 2500,
+    "comparisons": [
+      { "criterionA": "EXPERIENCE", "criterionB": "PRICE", "value": 8.0 },
+      { "criterionA": "EXPERIENCE", "criterionB": "RATING", "value": 4.0 },
+      { "criterionA": "EXPERIENCE", "criterionB": "LOCATION", "value": 8.0 },
+      { "criterionA": "EXPERIENCE", "criterionB": "FORMAT", "value": 8.0 },
+      { "criterionA": "PRICE", "criterionB": "RATING", "value": 0.5 },
+      { "criterionA": "PRICE", "criterionB": "LOCATION", "value": 1.0 },
+      { "criterionA": "PRICE", "criterionB": "FORMAT", "value": 1.0 },
+      { "criterionA": "RATING", "criterionB": "LOCATION", "value": 2.0 },
+      { "criterionA": "RATING", "criterionB": "FORMAT", "value": 2.0 },
+      { "criterionA": "LOCATION", "criterionB": "FORMAT", "value": 1.0 }
+    ]
+  },
+  {
+    "id": "SHOWCASE-EQUAL",
+    "label": "Рівні критерії",
+    "mode": "AHP_PAIRWISE",
+    "city": "Одеса",
+    "injuryType": "Неврологічна реабілітація",
+    "maxBudgetUah": 2600,
+    "comparisons": [
+      { "criterionA": "EXPERIENCE", "criterionB": "PRICE", "value": 1.0 },
+      { "criterionA": "EXPERIENCE", "criterionB": "RATING", "value": 1.0 },
+      { "criterionA": "EXPERIENCE", "criterionB": "LOCATION", "value": 1.0 },
+      { "criterionA": "EXPERIENCE", "criterionB": "FORMAT", "value": 1.0 },
+      { "criterionA": "PRICE", "criterionB": "RATING", "value": 1.0 },
+      { "criterionA": "PRICE", "criterionB": "LOCATION", "value": 1.0 },
+      { "criterionA": "PRICE", "criterionB": "FORMAT", "value": 1.0 },
+      { "criterionA": "RATING", "criterionB": "LOCATION", "value": 1.0 },
+      { "criterionA": "RATING", "criterionB": "FORMAT", "value": 1.0 },
+      { "criterionA": "LOCATION", "criterionB": "FORMAT", "value": 1.0 }
+    ]
+  },
+  {
+    "id": "SHOWCASE-RATING",
+    "label": "Пріоритет рейтингу (узгоджений AHP)",
+    "mode": "AHP_PAIRWISE",
+    "city": "Київ",
+    "injuryType": "Післяопераційне відновлення",
+    "maxBudgetUah": 2400,
+    "comparisons": [
+      { "criterionA": "EXPERIENCE", "criterionB": "PRICE", "value": 1.0 },
+      { "criterionA": "EXPERIENCE", "criterionB": "RATING", "value": 0.3333333333333333 },
+      { "criterionA": "EXPERIENCE", "criterionB": "LOCATION", "value": 1.0 },
+      { "criterionA": "EXPERIENCE", "criterionB": "FORMAT", "value": 1.0 },
+      { "criterionA": "PRICE", "criterionB": "RATING", "value": 0.3333333333333333 },
+      { "criterionA": "PRICE", "criterionB": "LOCATION", "value": 1.0 },
+      { "criterionA": "PRICE", "criterionB": "FORMAT", "value": 1.0 },
+      { "criterionA": "RATING", "criterionB": "LOCATION", "value": 3.0 },
+      { "criterionA": "RATING", "criterionB": "FORMAT", "value": 3.0 },
+      { "criterionA": "LOCATION", "criterionB": "FORMAT", "value": 1.0 }
+    ]
+  },
+  {
+    "id": "SHOWCASE-FORMAT",
+    "label": "Пріоритет формату (WSM)",
+    "mode": "DIRECT_WSM",
+    "city": "Дніпро",
+    "injuryType": "Відновлення рухливості",
+    "maxBudgetUah": 2200,
+    "priorities": { "EXPERIENCE": 4, "PRICE": 4, "RATING": 5, "LOCATION": 4, "FORMAT": 9 }
+  },
+  {
+    "id": "SHOWCASE-LOCATION",
+    "label": "Пріоритет локації (WSM)",
+    "mode": "DIRECT_WSM",
+    "city": "Харків",
+    "injuryType": "Спортивні травми",
+    "maxBudgetUah": 2300,
+    "priorities": { "EXPERIENCE": 4, "PRICE": 5, "RATING": 5, "LOCATION": 9, "FORMAT": 4 }
+  },
+  {
+    "id": "SHOWCASE-WSM-BALANCED",
+    "label": "WSM збалансовані ваги",
+    "mode": "DIRECT_WSM",
+    "city": "Київ",
+    "injuryType": "Спортивні травми",
+    "maxBudgetUah": 2500,
+    "priorities": {
+      "EXPERIENCE": 5,
+      "PRICE": 5,
+      "RATING": 5,
+      "LOCATION": 5,
+      "FORMAT": 5
+    }
+  },
+  {
+    "id": "SHOWCASE-WSM-PRICE",
+    "label": "WSM низька ціна",
+    "mode": "DIRECT_WSM",
+    "city": "Київ",
+    "injuryType": "Спортивні травми",
+    "maxBudgetUah": 2000,
+    "priorities": {
+      "EXPERIENCE": 3,
+      "PRICE": 9,
+      "RATING": 4,
+      "LOCATION": 4,
+      "FORMAT": 5
+    }
+  }
+]
