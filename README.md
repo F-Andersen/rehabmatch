@@ -6,20 +6,25 @@
 
 ## Локальний запуск (розробка)
 
-**Вимоги:** Node.js 20+, npm 10+, Docker Desktop (для PostgreSQL на M1B; для M1A API працює без БД).
+**Вимоги:** Node.js 20+, npm 10+, Docker Desktop (PostgreSQL).
 
-1. Скопіюйте `.env.example` → `.env` і за потреби змініть паролі (не комітьте `.env`).
+1. Скопіюйте `.env.example` → `.env`, задайте `POSTGRES_PASSWORD`, `DATABASE_URL`, `SEED_ADMIN_PASSWORD` (не комітьте `.env`).
 2. У корені проєкту:
    ```bash
    npm install
+   npm run db:up
+   npm run db:migrate
+   npm run db:seed
    npm run dev
    ```
 3. Перевірки:
    ```bash
+   npm run db:validate
    npm run typecheck
    npm run build
    npm test
    curl http://localhost:3001/api/v1/health
+   curl http://localhost:3001/api/v1/health/database
    ```
 4. Відкрийте [http://localhost:5173](http://localhost:5173) — на головній сторінці відображається результат `GET /api/v1/health` через Vite proxy.
 
@@ -27,11 +32,16 @@
 |---|---|
 | Frontend (Vite) | http://localhost:5173 |
 | API (Express) | http://localhost:3001 |
-| PostgreSQL (Docker, M1B+) | localhost:5432 |
+| PostgreSQL (Docker) | localhost:5432 |
 
 ```bash
-npm run db:up    # підняти PostgreSQL (для наступного етапу M1B)
-npm run db:down  # зупинити контейнер
+npm run db:up        # PostgreSQL (Docker Compose)
+npm run db:down      # зупинити контейнер
+npm run db:validate  # prisma validate
+npm run db:generate  # prisma generate
+npm run db:migrate   # prisma migrate dev
+npm run db:seed      # демо-дані (ідемпотентно)
+npm run db:studio    # Prisma Studio
 ```
 
 ## Почати за 5 хвилин (пакет специфікації)
