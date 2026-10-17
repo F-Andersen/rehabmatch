@@ -3,6 +3,35 @@ import { UserRole } from "@prisma/client";
 import { prisma } from "../../lib/prisma.js";
 import { requireAuth, requireRole } from "../../middleware/auth.js";
 import {
+  adminUserStatusSchema,
+  adminUsersQuerySchema,
+  listUsersForAdmin,
+  updateUserActiveStatus,
+} from "../../modules/admin/admin.users.service.js";
+import {
+  catalogCreateSchema,
+  catalogPatchSchema,
+  createCatalogAdmin,
+  listCatalogAdmin,
+  parseCatalogType,
+  patchCatalogAdmin,
+} from "../../modules/admin/admin.catalog.service.js";
+import {
+  criteriaPatchSchema,
+  listCriteriaAdmin,
+  patchCriterionAdmin,
+} from "../../modules/admin/admin.criteria.service.js";
+import { listAppointmentsQuerySchema } from "../../modules/appointments/appointment.schemas.js";
+import { listAdminAppointmentRequests } from "../../modules/appointments/appointment.service.js";
+import {
+  adminReviewStatusSchema,
+  adminReviewsQuerySchema,
+} from "../../modules/reviews/review.schemas.js";
+import {
+  listReviewsForAdmin,
+  updateReviewStatusAdmin,
+} from "../../modules/reviews/review.service.js";
+import {
   adminSpecialistsQuerySchema,
   adminVerificationSchema,
 } from "../../modules/specialists/specialist.schemas.js";
@@ -18,10 +47,11 @@ adminRouter.use(requireAuth, requireRole(UserRole.ADMIN));
 
 adminRouter.get("/summary", async (_req, res, next) => {
   try {
-    const [users, specialists, pendingSpecialists] = await Promise.all([
+    const [users, specialists, pendingSpecialists, pendingReviews] = await Promise.all([
       prisma.user.count(),
       prisma.specialist.count(),
       prisma.specialist.count({ where: { verificationStatus: "PENDING" } }),
+      prisma.review.count({ where: { status: "PENDING" } }),
     ]);
 
     res.json({
@@ -29,8 +59,29 @@ adminRouter.get("/summary", async (_req, res, next) => {
         users,
         specialists,
         pendingSpecialists,
+        pendingReviews,
       },
     });
+  } catch (error) {
+    next(error);
+  }
+});
+
+adminRouter.get("/users", async (req, res, next) => {
+  try {
+    const query = adminUsersQuerySchema.parse(req.query);
+    const result = await listUsersForAdmin(query);
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
+});
+
+adminRouter.patch("/users/:id/status", async (req, res, next) => {
+  try {
+    const input = adminUserStatusSchema.parse(req.body);
+    const data = await updateUserActiveStatus(req.params.id, input.isActive);
+    res.json({ data });
   } catch (error) {
     next(error);
   }
@@ -67,6 +118,87 @@ adminRouter.patch("/specialists/:id/verification", async (req, res, next) => {
   try {
     const input = adminVerificationSchema.parse(req.body);
     const data = await updateSpecialistVerification(req.params.id, input.status);
+    res.json({ data });
+  } catch (error) {
+    next(error);
+  }
+});
+
+adminRouter.get("/reviews", async (req, res, next) => {
+  try {
+    const query = adminReviewsQuerySchema.parse(req.query);
+    const result = await listReviewsForAdmin(query);
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
+});
+
+adminRouter.patch("/reviews/:id/status", async (req, res, next) => {
+  try {
+    const input = adminReviewStatusSchema.parse(req.body);
+    const data = await updateReviewStatusAdmin(req.params.id, input.status);
+    res.json({ data });
+  } catch (error) {
+    next(error);
+  }
+});
+
+adminRouter.get("/appointment-requests", async (req, res, next) => {
+  try {
+    const query = listAppointmentsQuerySchema.parse(req.query);
+    const result = await listAdminAppointmentRequests(query);
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
+});
+
+adminRouter.get("/catalog/:type", async (req, res, next) => {
+  try {
+    const type = parseCatalogType(req.params.type);
+    const data = await listCatalogAdmin(type);
+    res.json({ data });
+  } catch (error) {
+    next(error);
+  }
+});
+
+adminRouter.post("/catalog/:type", async (req, res, next) => {
+  try {
+    const type = parseCatalogType(req.params.type);
+    const input = catalogCreateSchema.parse(req.body);
+    const data = await createCatalogAdmin(type, input);
+    res.status(201).json({ data });
+  } catch (error) {
+    next(error);
+  }
+});
+
+adminRouter.patch("/catalog/:type/:id", async (req, res, next) => {
+  try {
+    const type = parseCatalogType(req.params.type);
+    const input = catalogPatchSchema.parse(req.body);
+    const data = await patchCatalogAdmin(type, req.params.id, input);
+    res.json({ data });
+  } catch (error) {
+    next(error);
+  }
+});
+
+adminRouter.get("/criteria", async (_req, res, next) => {
+  try {
+    const data = await listCriteriaAdmin();
+    res.json({ data });
+  } catch (error) {
+    next(error);
+  }
+});
+
+adminRouter.patch("/criteria/:id", async (req, res, next) => {
+  try {
+    const input = criteriaPatchSchema.parse(req.body);
+    const data = await patchCriterionAdmin(req.params.id, input);
     res.json({ data });
   } catch (error) {
     next(error);
