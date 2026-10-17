@@ -1,6 +1,15 @@
-import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
 import { Link, useParams, useSearchParams } from "react-router-dom";
+import { z } from "zod";
+import { useAuth } from "../features/auth/AuthProvider";
+import {
+  createConsultationRequest,
+  fetchMyReviewForSpecialist,
+  submitSpecialistReview,
+} from "../features/reviews-requests/api";
 import {
   fetchCatalogDictionaries,
   fetchSpecialistById,
@@ -8,6 +17,7 @@ import {
   fetchSpecialistsList,
 } from "../features/specialists/api";
 import type { SpecialistCard, SpecialistsSort } from "../features/specialists/types";
+import { ApiError } from "../lib/api";
 
 const inputClass =
   "w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/20";
@@ -358,6 +368,270 @@ export function SpecialistsListPage() {
   );
 }
 
+const reviewFormSchema = z.object({
+  rating: z.coerce.number().int().min(1, "Оберіть оцінку").max(5),
+  comment: z.string().trim().min(3, "Мінімум 3 символи").max(2000),
+});
+
+const consultationFormSchema = z.object({
+  preferredAt: z.string().min(1, "Оберіть бажану дату"),
+  note: z.string().trim().max(500).optional(),
+});
+
+type ReviewFormValues = z.infer<typeof reviewFormSchema>;
+type ConsultationFormValues = z.infer<typeof consultationFormSchema>;
+
+function SpecialistReviewSection({ specialistId }: { specialistId: string }) {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const ownReviewQuery = useQuery({
+    queryKey: ["specialist", specialistId, "my-review"],
+    queryFn: () => fetchMyReviewForSpecialist(specialistId),
+    enabled: user?.role === "PATIENT",
+  });
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<ReviewFormValues>({
+    resolver: zodResolver(reviewFormSchema),
+    defaultValues: { rating: 5, comment: "" },
+  });
+
+  useEffect(() => {
+    if (ownReviewQuery.data && ownReviewQuery.data.status !== "APPROVED") {
+      reset({
+        rating: ownReviewQuery.data.rating,
+        comment: ownReviewQuery.data.comment,
+      });
+    }
+  }, [ownReviewQuery.data, reset]);
+
+  const mutation = useMutation({
+    mutationFn: (values: ReviewFormValues) => submitSpecialistReview(specialistId, values),
+    onSuccess: async (data) => {
+      setError(null);
+      setMessage(data.message ?? "Відгук надіслано на модерацію.");
+      await queryClient.invalidateQueries({ queryKey: ["specialist", specialistId, "my-review"] });
+    },
+    onError: (err) => {
+      setMessage(null);
+      setError(err instanceof ApiError ? err.message : "Не вдалося надіслати відгук.");
+    },
+  });
+
+  if (!user) {
+    return (
+      <p className="mt-3 text-sm text-text-muted">
+        <Link to="/login" className="text-brand-600 hover:text-brand-700">Увійдіть</Link>, щоб
+        залишити відгук.
+      </p>
+    );
+  }
+
+  if (user.role !== "PATIENT") {
+    return <p className="mt-3 text-sm text-text-muted">Відгуки можуть залишати лише пацієнти.</p>;
+  }
+
+  const own = ownReviewQuery.data;
+  if (own?.status === "PENDING") {
+    return (
+      <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+        Ваш відгук очікує модерації. Після схвалення він зʼявиться в списку нижче.
+      </p>
+    );
+  }
+
+  if (own?.status === "APPROVED") {
+    return (
+      <p className="mt-3 rounded-lg border border-border bg-surface-tint px-3 py-2 text-sm text-text-muted">
+        Ви вже залишили схвалений відгук про цього спеціаліста. Повторний відгук недоступний.
+      </p>
+    );
+  }
+
+  return (
+    <form
+      className="mt-4 space-y-3 rounded-lg border border-border bg-surface-tint/40 p-4"
+      onSubmit={handleSubmit((values) => mutation.mutate(values))}
+      noValidate
+    >
+      <h3 className="text-sm font-semibold text-text">Залишити відгук</h3>
+      {message && <p className="text-sm text-success">{message}</p>}
+      {error && <p className="text-sm text-red-700">{error}</p>}
+      <div>
+        <label htmlFor="rating" className="mb-1 block text-sm font-medium">Оцінка</label>
+        <select id="rating" className={inputClass} {...register("rating")}>
+          {[5, 4, 3, 2, 1].map((n) => (
+            <option key={n} value={n}>{n} зірок</option>
+          ))}
+        </select>
+        {errors.rating && <p className="mt-1 text-xs text-red-600">{errors.rating.message}</p>}
+      </div>
+      <div>
+        <label htmlFor="comment" className="mb-1 block text-sm font-medium">Коментар</label>
+        <textarea id="comment" rows={4} className={inputClass} {...register("comment")} />
+        {errors.comment && <p className="mt-1 text-xs text-red-600">{errors.comment.message}</p>}
+      </div>
+      <button
+        type="submit"
+        disabled={isSubmitting || mutation.isPending}
+        className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+      >
+        {mutation.isPending ? "Надсилання…" : own ? "Оновити відгук" : "Надіслати відгук"}
+      </button>
+    </form>
+  );
+}
+
+function ConsultationRequestSection({
+  specialistId,
+  specialistName,
+}: {
+  specialistId: string;
+  specialistName: string;
+}) {
+  const { user } = useAuth();
+  const [open, setOpen] = useState(false);
+  const [result, setResult] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<ConsultationFormValues>({
+    resolver: zodResolver(consultationFormSchema),
+    defaultValues: { preferredAt: "", note: "" },
+  });
+
+  const mutation = useMutation({
+    mutationFn: (values: ConsultationFormValues) => {
+      const preferredAt = new Date(values.preferredAt).toISOString();
+      return createConsultationRequest({
+        specialistId,
+        preferredAt,
+        note: values.note || undefined,
+      });
+    },
+    onSuccess: () => {
+      setError(null);
+      setResult("Запит надіслано. Спеціаліст розгляне його найближчим часом.");
+      reset();
+      setOpen(false);
+    },
+    onError: (err) => {
+      setResult(null);
+      setError(err instanceof ApiError ? err.message : "Не вдалося надіслати запит.");
+    },
+  });
+
+  if (!user) {
+    return (
+      <div className="mt-8 rounded-lg border border-border bg-surface-tint/30 p-4">
+        <p className="text-sm text-text-muted">
+          Щоб надіслати запит на консультацію,{" "}
+          <Link to="/login" className="font-medium text-brand-600 hover:text-brand-700">увійдіть</Link>{" "}
+          як пацієнт.
+        </p>
+      </div>
+    );
+  }
+
+  if (user.role !== "PATIENT") {
+    return null;
+  }
+
+  return (
+    <section className="mt-8 rounded-lg border border-border p-4">
+      <h2 className="text-lg font-semibold text-text">Запит на консультацію</h2>
+      <p className="mt-1 text-sm text-text-muted">
+        Це не підтверджений запис — лише звернення до спеціаліста {specialistName}.
+      </p>
+      {result && <p className="mt-3 text-sm text-success">{result}</p>}
+      {error && <p className="mt-3 text-sm text-red-700">{error}</p>}
+      <div className="mt-4 flex flex-wrap gap-3">
+        <button
+          type="button"
+          className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+          onClick={() => setOpen(true)}
+        >
+          Надіслати запит на консультацію
+        </button>
+        <Link
+          to="/my-requests"
+          className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text hover:bg-surface-tint"
+        >
+          Мої заявки
+        </Link>
+      </div>
+
+      {open && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="consultation-dialog-title"
+        >
+          <form
+            className="w-full max-w-md rounded-xl bg-surface p-6 shadow-lg"
+            onSubmit={handleSubmit((values) => mutation.mutate(values))}
+            noValidate
+          >
+            <h3 id="consultation-dialog-title" className="text-lg font-semibold text-text">
+              Запит на консультацію
+            </h3>
+            <div className="mt-4 space-y-3">
+              <div>
+                <label htmlFor="preferredAt" className="mb-1 block text-sm font-medium">
+                  Бажана дата та час
+                </label>
+                <input
+                  id="preferredAt"
+                  type="datetime-local"
+                  className={inputClass}
+                  {...register("preferredAt")}
+                />
+                {errors.preferredAt && (
+                  <p className="mt-1 text-xs text-red-600">{errors.preferredAt.message}</p>
+                )}
+              </div>
+              <div>
+                <label htmlFor="note" className="mb-1 block text-sm font-medium">
+                  Коротке повідомлення (необовʼязково)
+                </label>
+                <textarea id="note" rows={3} className={inputClass} {...register("note")} />
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end gap-2">
+              <button
+                type="button"
+                className="rounded-lg border border-border px-4 py-2 text-sm"
+                onClick={() => setOpen(false)}
+              >
+                Скасувати
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitting || mutation.isPending}
+                className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+              >
+                {mutation.isPending ? "Надсилання…" : "Надіслати"}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+    </section>
+  );
+}
+
 function verificationLabel(status: string) {
   switch (status) {
     case "APPROVED":
@@ -468,6 +742,8 @@ export function SpecialistDetailPage() {
           </div>
         </section>
 
+        <ConsultationRequestSection specialistId={specialist.id} specialistName={specialist.fullName} />
+
         {specialist.services.length > 0 && (
           <section className="mt-8">
             <h2 className="text-lg font-semibold text-text">Послуги</h2>
@@ -489,6 +765,13 @@ export function SpecialistDetailPage() {
 
         <section className="mt-8">
           <h2 className="text-lg font-semibold text-text">Відгуки</h2>
+          <p className="mt-1 text-sm text-text-muted">
+            Середній рейтинг:{" "}
+            {specialist.ratingCount > 0
+              ? `${specialist.ratingAvg.toFixed(1)} (${specialist.ratingCount} схвалених)`
+              : "ще немає схвалених відгуків"}
+          </p>
+          <SpecialistReviewSection specialistId={specialist.id} />
           {reviewsQuery.isLoading ? (
             <p className="mt-2 text-sm text-text-muted">Завантаження…</p>
           ) : reviewsQuery.data?.data.length === 0 ? (

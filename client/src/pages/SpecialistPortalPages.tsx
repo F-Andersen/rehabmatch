@@ -12,6 +12,10 @@ import {
   updateOwnSpecialistProfile,
 } from "../features/specialists/api";
 import { ApiError } from "../lib/api";
+import {
+  fetchSpecialistAppointmentRequests,
+  patchSpecialistAppointmentStatus,
+} from "../features/reviews-requests/api";
 
 const inputClass =
   "w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/20";
@@ -385,11 +389,117 @@ export function SpecialistProfileEditPage() {
   return <SpecialistDashboardPage />;
 }
 
+function specialistRequestStatusLabel(status: string) {
+  switch (status) {
+    case "REQUESTED":
+      return "Нова";
+    case "ACCEPTED":
+      return "Прийнято";
+    case "DECLINED":
+      return "Відхилено";
+    case "CANCELLED":
+      return "Скасовано пацієнтом";
+    default:
+      return status;
+  }
+}
+
 export function SpecialistRequestsPage() {
+  const queryClient = useQueryClient();
+  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [feedback, setFeedback] = useState<string | null>(null);
+
+  const listQuery = useQuery({
+    queryKey: ["specialist", "appointment-requests", statusFilter],
+    queryFn: () =>
+      fetchSpecialistAppointmentRequests({
+        page: "1",
+        pageSize: "50",
+        status: statusFilter || undefined,
+      }),
+  });
+
+  const statusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: "ACCEPTED" | "DECLINED" }) =>
+      patchSpecialistAppointmentStatus(id, status),
+    onSuccess: async () => {
+      setFeedback("Статус оновлено.");
+      await queryClient.invalidateQueries({ queryKey: ["specialist", "appointment-requests"] });
+    },
+    onError: (error) => {
+      setFeedback(error instanceof ApiError ? error.message : "Не вдалося оновити статус.");
+    },
+  });
+
   return (
-    <section className="rounded-xl border border-border bg-surface p-8 shadow-sm">
-      <h1 className="text-2xl font-semibold text-text">Заявки на консультацію</h1>
-      <p className="mt-3 text-text-muted">Обробка заявок спеціалістом — етап M6.</p>
+    <section className="mx-auto max-w-4xl space-y-6 px-4 py-8">
+      <div className="rounded-xl border border-border bg-surface p-6 shadow-sm">
+        <h1 className="text-2xl font-semibold text-text">Заявки на консультацію</h1>
+        <p className="mt-2 text-sm text-text-muted">
+          Переглядайте звернення пацієнтів і змінюйте статус лише для нових заявок.
+        </p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          {["", "REQUESTED", "ACCEPTED", "DECLINED", "CANCELLED"].map((value) => (
+            <button
+              key={value || "all"}
+              type="button"
+              className={[
+                "rounded-lg px-3 py-1.5 text-sm font-medium",
+                statusFilter === value
+                  ? "bg-brand-600 text-white"
+                  : "border border-border text-text-muted hover:bg-surface-tint",
+              ].join(" ")}
+              onClick={() => setStatusFilter(value)}
+            >
+              {value === "" ? "Усі" : value}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {feedback && (
+        <p className="rounded-lg border border-border bg-surface-tint px-3 py-2 text-sm">{feedback}</p>
+      )}
+
+      {listQuery.isLoading ? (
+        <p className="text-text-muted">Завантаження…</p>
+      ) : listQuery.data?.data.length === 0 ? (
+        <p className="text-text-muted">Заявок немає.</p>
+      ) : (
+        <ul className="space-y-3">
+          {listQuery.data?.data.map((item) => (
+            <li key={item.id} className="rounded-xl border border-border bg-surface p-4 shadow-sm">
+              <p className="font-medium text-text">{item.patientName ?? "Пацієнт"}</p>
+              <p className="text-sm text-text-muted">
+                {new Date(item.createdAt).toLocaleString("uk-UA")} · бажаний час:{" "}
+                {new Date(item.preferredAt).toLocaleString("uk-UA")}
+              </p>
+              <p className="mt-1 text-sm">
+                Статус: <strong>{specialistRequestStatusLabel(item.status)}</strong>
+              </p>
+              {item.note && <p className="mt-2 text-sm text-text-muted">{item.note}</p>}
+              {item.status === "REQUESTED" && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    className="rounded-lg bg-success px-3 py-1.5 text-sm font-medium text-white"
+                    onClick={() => statusMutation.mutate({ id: item.id, status: "ACCEPTED" })}
+                  >
+                    Прийняти
+                  </button>
+                  <button
+                    type="button"
+                    className="rounded-lg border border-red-300 px-3 py-1.5 text-sm font-medium text-red-700"
+                    onClick={() => statusMutation.mutate({ id: item.id, status: "DECLINED" })}
+                  >
+                    Відхилити
+                  </button>
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
   );
 }
