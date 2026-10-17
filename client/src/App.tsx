@@ -19,6 +19,7 @@ import {
   MatchingResultsPage,
   MyRequestsPage,
   PatientDashboardPage,
+  RecommendationDetailPage,
   RecommendationsHistoryPage,
   SettingsPage,
 } from "./pages/PatientPages";
@@ -81,6 +82,14 @@ export default function App() {
             element={
               <ProtectedRoute roles={["PATIENT"]}>
                 <RecommendationsHistoryPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="recommendations/:id"
+            element={
+              <ProtectedRoute roles={["PATIENT"]}>
+                <RecommendationDetailPage />
               </ProtectedRoute>
             }
           />
