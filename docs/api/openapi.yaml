@@ -2,39 +2,2685 @@ openapi: 3.0.3
 info:
   title: RehabMatch API
   version: 1.0.0
+  description: |
+    RehabMatch REST API (v1). All routes are mounted under `/api/v1` unless noted.
+
+    ## Authentication
+    Session-based auth uses the HTTP-only cookie `rehabmatch_session`, set on successful
+    `POST /auth/register` or `POST /auth/login`. Send cookies on subsequent requests
+    (`credentials: include` in browser clients). `POST /auth/logout` clears the cookie.
+
+    ## RBAC (role-based access control)
+    Roles: `PATIENT`, `SPECIALIST`, `ADMIN`. Middleware returns `401 UNAUTHENTICATED` when
+    no valid session exists, and `403 FORBIDDEN` when the user role is not allowed.
+
+    | Role | Typical access |
+    |------|----------------|
+    | (none) | Public catalog, specialist directory, approved reviews |
+    | PATIENT | Search, AHP preview, recommendations, reviews (create), consultation requests, `/patient/me` |
+    | SPECIALIST | Specialist portal (`/specialist/*`) |
+    | ADMIN | Admin console (`/admin/*`) |
+
+    ## CSRF
+    Mutating methods (`POST`, `PUT`, `PATCH`, `DELETE`) require a matching `Origin` or
+    `Referer` header aligned with the configured client origin.
+
+    ## Response envelope
+    Success payloads usually wrap entities in `{ "data": ... }`. Paginated lists use
+    `{ "data": [...], "meta": PaginationMeta }`. Errors use `{ "error": ErrorResponse }`.
+
+servers:
+  - url: http://localhost:3001
+    description: Local development API
+
+tags:
+  - name: Health
+    description: Liveness and dependency checks
+  - name: Auth
+    description: Registration, login, session, and current-user profile
+  - name: Catalog
+    description: Public and admin reference data
+  - name: Specialists
+    description: Public specialist directory and specialist portal
+  - name: Search
+    description: Patient search requests (filter snapshots)
+  - name: AHP
+    description: AHP / WSM weight preview (no persistence)
+  - name: Recommendations
+    description: Ranked specialist recommendations for a search request
+  - name: Reviews
+    description: Patient reviews and admin moderation
+  - name: Consultation Requests
+    description: Appointment / consultation requests between patients and specialists
+  - name: Admin
+    description: Administration (ADMIN role only)
+
 paths:
+  /api/v1/health:
+    get:
+      tags: [Health]
+      summary: API liveness
+      operationId: getHealth
+      responses:
+        "200":
+          description: Service is up
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthOkEnvelope"
+              examples:
+                ok:
+                  value:
+                    data:
+                      status: ok
+
+  /api/v1/health/database:
+    get:
+      tags: [Health]
+      summary: Database connectivity
+      operationId: getHealthDatabase
+      responses:
+        "200":
+          description: Database reachable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthDatabaseOkEnvelope"
+              examples:
+                ok:
+                  value:
+                    data:
+                      status: ok
+                      database: connected
+        "503":
+          description: Database unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+              examples:
+                unavailable:
+                  value:
+                    error:
+                      code: DATABASE_UNAVAILABLE
+                      message: Не вдалося підключитися до бази даних
+
+  /api/v1/auth/register:
+    post:
+      tags: [Auth]
+      summary: Register patient or specialist
+      operationId: authRegister
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+            examples:
+              patient:
+                value:
+                  fullName: Оlena Koval
+                  email: olena@example.com
+                  password: secretpass
+                  role: PATIENT
+      responses:
+        "201":
+          description: User created; session cookie set
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+              description: rehabmatch_session session token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicUserEnvelope"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "409":
+          $ref: "#/components/responses/ConflictError"
+
+  /api/v1/auth/login:
+    post:
+      tags: [Auth]
+      summary: Login
+      operationId: authLogin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+            examples:
+              login:
+                value:
+                  email: olena@example.com
+                  password: secretpass
+      responses:
+        "200":
+          description: Authenticated; session cookie set
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicUserEnvelope"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedError"
+
+  /api/v1/auth/logout:
+    post:
+      tags: [Auth]
+      summary: Logout (invalidate session)
+      operationId: authLogout
+      security:
+        - rehabmatchSession: []
+      responses:
+        "204":
+          description: Session cleared
+        "401":
+          $ref: "#/components/responses/UnauthenticatedError"
+
+  /api/v1/auth/me:
+    get:
+      tags: [Auth]
+      summary: Current authenticated user
+      operationId: authMe
+      security:
+        - rehabmatchSession: []
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicUserEnvelope"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedError"
+
+  /api/v1/me:
+    patch:
+      tags: [Auth]
+      summary: Update current user profile
+      description: Requires authenticated session (any role).
+      operationId: updateMe
+      security:
+        - rehabmatchSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateMeRequest"
+            examples:
+              patch:
+                value:
+                  fullName: Оlena Kovalenko
+                  phone: "+380501234567"
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicUserEnvelope"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedError"
+
+  /api/v1/patient/me:
+    get:
+      tags: [Auth]
+      summary: Patient profile ids
+      description: RBAC — PATIENT role only.
+      operationId: getPatientMe
+      security:
+        - rehabmatchSession: []
+      responses:
+        "200":
+          description: Patient identifiers
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatientMeEnvelope"
+              examples:
+                ok:
+                  value:
+                    data:
+                      patientId: 550e8400-e29b-41d4-a716-446655440001
+                      userId: 550e8400-e29b-41d4-a716-446655440000
+        "401":
+          $ref: "#/components/responses/UnauthenticatedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+
+  /api/v1/catalog:
+    get:
+      tags: [Catalog]
+      summary: Public catalog dictionaries
+      operationId: getPublicCatalog
+      responses:
+        "200":
+          description: Active reference data for UI filters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicCatalogEnvelope"
+
+  /api/v1/specialists:
+    get:
+      tags: [Specialists]
+      summary: List public specialists
+      operationId: listSpecialists
+      parameters:
+        - $ref: "#/components/parameters/SpecialistsQueryQ"
+        - $ref: "#/components/parameters/SpecialistsInjuryTypeId"
+        - $ref: "#/components/parameters/SpecialistsSpecializationId"
+        - $ref: "#/components/parameters/SpecialistsCityId"
+        - $ref: "#/components/parameters/SpecialistsDistrictId"
+        - $ref: "#/components/parameters/SpecialistsMaxBudget"
+        - $ref: "#/components/parameters/SpecialistsFormatId"
+        - $ref: "#/components/parameters/SpecialistsInclusiveOnly"
+        - $ref: "#/components/parameters/SpecialistsSort"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          description: Paginated specialist cards
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicSpecialistCardListResponse"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+
+  /api/v1/specialists/{id}:
+    get:
+      tags: [Specialists]
+      summary: Public specialist profile
+      operationId: getSpecialistById
+      parameters:
+        - $ref: "#/components/parameters/SpecialistId"
+      responses:
+        "200":
+          description: Specialist detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicSpecialistEnvelope"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+
   /api/v1/specialists/{id}/reviews:
     get:
-      summary: Public approved reviews
+      tags: [Reviews]
+      summary: Approved reviews for specialist
+      operationId: listSpecialistReviews
+      parameters:
+        - $ref: "#/components/parameters/SpecialistId"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          description: Paginated approved reviews
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicReviewListResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
     post:
-      summary: Patient create or update review (PENDING)
-  /api/v1/appointment-requests:
-    post:
-      summary: Patient create consultation request
-  /api/v1/me/appointment-requests:
+      tags: [Reviews]
+      summary: Create or update review (moderation queue)
+      description: RBAC — PATIENT role only. Upsert sets status PENDING.
+      operationId: upsertSpecialistReview
+      security:
+        - rehabmatchSession: []
+      parameters:
+        - $ref: "#/components/parameters/SpecialistId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateReviewRequest"
+            examples:
+              review:
+                value:
+                  rating: 5
+                  comment: Дуже уважний спеціаліст, рекомендую.
+      responses:
+        "201":
+          description: Review submitted for moderation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReviewUpsertEnvelope"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "409":
+          $ref: "#/components/responses/ConflictError"
+
+  /api/v1/specialists/{id}/reviews/mine:
     get:
-      summary: Patient list own requests
-  /api/v1/me/appointment-requests/{id}/cancel:
-    patch:
-      summary: Patient cancel REQUESTED request
+      tags: [Reviews]
+      summary: Patient's own review for specialist
+      description: RBAC — PATIENT role only.
+      operationId: getMyReviewForSpecialist
+      security:
+        - rehabmatchSession: []
+      parameters:
+        - $ref: "#/components/parameters/SpecialistId"
+      responses:
+        "200":
+          description: Own review or null
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OwnReviewEnvelope"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+
+  /api/v1/specialist/me:
+    get:
+      tags: [Specialists]
+      summary: Specialist own profile
+      description: RBAC — SPECIALIST role only.
+      operationId: getSpecialistPortalMe
+      security:
+        - rehabmatchSession: []
+      responses:
+        "200":
+          description: Full specialist profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicSpecialistEnvelope"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+    put:
+      tags: [Specialists]
+      summary: Update specialist profile
+      description: RBAC — SPECIALIST role only. Material changes may reset verification to PENDING.
+      operationId: updateSpecialistPortalMe
+      security:
+        - rehabmatchSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateSpecialistProfileRequest"
+      responses:
+        "200":
+          description: Updated profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicSpecialistEnvelope"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+
+  /api/v1/specialist/me/services:
+    put:
+      tags: [Specialists]
+      summary: Replace specialist services list
+      description: RBAC — SPECIALIST role only.
+      operationId: replaceSpecialistServices
+      security:
+        - rehabmatchSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReplaceServicesRequest"
+      responses:
+        "200":
+          description: Updated profile with services
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicSpecialistEnvelope"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+
   /api/v1/specialist/appointment-requests:
     get:
-      summary: Specialist incoming requests
+      tags: [Consultation Requests]
+      summary: Specialist incoming consultation requests
+      description: RBAC — SPECIALIST role only.
+      operationId: listSpecialistAppointmentRequests
+      security:
+        - rehabmatchSession: []
+      parameters:
+        - $ref: "#/components/parameters/AppointmentStatus"
+        - $ref: "#/components/parameters/AppointmentPage"
+        - $ref: "#/components/parameters/AppointmentPageSize"
+      responses:
+        "200":
+          description: Paginated requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppointmentRequestListResponse"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+
   /api/v1/specialist/appointment-requests/{id}/status:
     patch:
-      summary: Specialist accept or decline
-  /api/v1/admin/reviews:
+      tags: [Consultation Requests]
+      summary: Accept or decline request
+      description: RBAC — SPECIALIST role only.
+      operationId: patchSpecialistAppointmentStatus
+      security:
+        - rehabmatchSession: []
+      parameters:
+        - $ref: "#/components/parameters/AppointmentRequestId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SpecialistAppointmentStatusRequest"
+            examples:
+              accept:
+                value:
+                  status: ACCEPTED
+      responses:
+        "200":
+          description: Updated request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppointmentRequestEnvelope"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /api/v1/search-requests:
+    post:
+      tags: [Search]
+      summary: Create search request
+      description: RBAC — PATIENT role only. Persists filter snapshot for recommendations.
+      operationId: createSearchRequest
+      security:
+        - rehabmatchSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSearchRequest"
+            examples:
+              ahp:
+                value:
+                  injuryTypeId: 550e8400-e29b-41d4-a716-446655440010
+                  maxBudget: 1500
+                  preferenceMode: AHP_PAIRWISE
+                  cityOnly: false
+                  inclusiveOnly: false
+      responses:
+        "201":
+          description: Search request created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchRequestSummaryEnvelope"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+
+  /api/v1/search-requests/{id}:
     get:
-      summary: Admin moderation queue
-  /api/v1/admin/reviews/{id}/status:
+      tags: [Search]
+      summary: Get search request detail
+      description: RBAC — PATIENT role only (own requests).
+      operationId: getSearchRequest
+      security:
+        - rehabmatchSession: []
+      parameters:
+        - $ref: "#/components/parameters/SearchRequestId"
+      responses:
+        "200":
+          description: Search request with comparisons/priorities if present
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchRequestDetailEnvelope"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+
+  /api/v1/ahp/calculate:
+    post:
+      tags: [AHP]
+      summary: Preview criterion weights (AHP or direct WSM)
+      description: RBAC — PATIENT role only. Does not persist data.
+      operationId: ahpCalculate
+      security:
+        - rehabmatchSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AhpCalculateRequest"
+      responses:
+        "200":
+          description: Computed weights and consistency metrics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AhpCalculateEnvelope"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /api/v1/recommendations:
+    post:
+      tags: [Recommendations]
+      summary: Generate recommendation for search request
+      description: RBAC — PATIENT role only. One recommendation per search request.
+      operationId: createRecommendation
+      security:
+        - rehabmatchSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateRecommendationRequest"
+      responses:
+        "201":
+          description: Ranked specialists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecommendationDetailEnvelope"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "409":
+          $ref: "#/components/responses/ConflictError"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+    get:
+      tags: [Recommendations]
+      summary: List patient recommendations
+      description: RBAC — PATIENT role only.
+      operationId: listRecommendations
+      security:
+        - rehabmatchSession: []
+      parameters:
+        - $ref: "#/components/parameters/RecommendationPage"
+        - $ref: "#/components/parameters/RecommendationPageSize"
+      responses:
+        "200":
+          description: Paginated recommendation summaries
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecommendationSummaryListResponse"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+
+  /api/v1/recommendations/{id}:
+    get:
+      tags: [Recommendations]
+      summary: Get recommendation with ranked items
+      description: RBAC — PATIENT role only (own data).
+      operationId: getRecommendation
+      security:
+        - rehabmatchSession: []
+      parameters:
+        - $ref: "#/components/parameters/RecommendationId"
+      responses:
+        "200":
+          description: Full recommendation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecommendationDetailEnvelope"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+
+  /api/v1/appointment-requests:
+    post:
+      tags: [Consultation Requests]
+      summary: Patient create consultation request
+      description: RBAC — PATIENT role only.
+      operationId: createAppointmentRequest
+      security:
+        - rehabmatchSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAppointmentRequest"
+            examples:
+              request:
+                value:
+                  specialistId: 550e8400-e29b-41d4-a716-446655440020
+                  preferredAt: "2026-11-01T10:00:00.000Z"
+                  note: Перше заняття після травми коліна
+      responses:
+        "201":
+          description: Request created (status REQUESTED)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppointmentRequestEnvelope"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /api/v1/me/appointment-requests:
+    get:
+      tags: [Consultation Requests]
+      summary: Patient list own consultation requests
+      description: RBAC — PATIENT role only.
+      operationId: listPatientAppointmentRequests
+      security:
+        - rehabmatchSession: []
+      parameters:
+        - $ref: "#/components/parameters/AppointmentStatus"
+        - $ref: "#/components/parameters/AppointmentPage"
+        - $ref: "#/components/parameters/AppointmentPageSize"
+      responses:
+        "200":
+          description: Paginated requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppointmentRequestListResponse"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+
+  /api/v1/me/appointment-requests/{id}/cancel:
     patch:
-      summary: Admin approve or reject review
-  /api/v1/admin/appointment-requests:
+      tags: [Consultation Requests]
+      summary: Patient cancel request
+      description: RBAC — PATIENT role only. Allowed when status is REQUESTED.
+      operationId: cancelPatientAppointmentRequest
+      security:
+        - rehabmatchSession: []
+      parameters:
+        - $ref: "#/components/parameters/AppointmentRequestId"
+      responses:
+        "200":
+          description: Cancelled request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppointmentRequestEnvelope"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /api/v1/admin/summary:
     get:
-      summary: Admin audit list
+      tags: [Admin]
+      summary: Dashboard counters
+      description: RBAC — ADMIN role only (entire /admin router).
+      operationId: adminSummary
+      security:
+        - rehabmatchSession: []
+      responses:
+        "200":
+          description: Counts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminSummaryEnvelope"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+
   /api/v1/admin/users:
     get:
-      summary: Admin user list
+      tags: [Admin]
+      summary: List users
+      operationId: adminListUsers
+      security:
+        - rehabmatchSession: []
+      parameters:
+        - name: role
+          in: query
+          schema:
+            $ref: "#/components/schemas/UserRole"
+        - name: isActive
+          in: query
+          schema:
+            type: string
+            enum: ["true", "false"]
+        - $ref: "#/components/parameters/AppointmentPage"
+        - $ref: "#/components/parameters/AppointmentPageSize"
+      responses:
+        "200":
+          description: Paginated admin user rows
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminUserListResponse"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+
   /api/v1/admin/users/{id}/status:
     patch:
-      summary: Admin activate or deactivate user
+      tags: [Admin]
+      summary: Activate or deactivate user
+      operationId: adminPatchUserStatus
+      security:
+        - rehabmatchSession: []
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminUserStatusRequest"
+            examples:
+              deactivate:
+                value:
+                  isActive: false
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminUserEnvelope"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /api/v1/admin/specialists:
+    get:
+      tags: [Admin]
+      summary: List specialists (admin)
+      operationId: adminListSpecialists
+      security:
+        - rehabmatchSession: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/SpecialistVerificationStatus"
+        - $ref: "#/components/parameters/AppointmentPage"
+        - $ref: "#/components/parameters/AppointmentPageSize"
+      responses:
+        "200":
+          description: Paginated specialists with admin fields
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminSpecialistListResponse"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+
+  /api/v1/admin/specialists/{id}:
+    get:
+      tags: [Admin]
+      summary: Specialist profile (admin view)
+      operationId: adminGetSpecialist
+      security:
+        - rehabmatchSession: []
+      parameters:
+        - $ref: "#/components/parameters/SpecialistId"
+      responses:
+        "200":
+          description: Specialist profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicSpecialistEnvelope"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+
+  /api/v1/admin/specialists/{id}/verification:
+    patch:
+      tags: [Admin]
+      summary: Update specialist verification status
+      operationId: adminPatchSpecialistVerification
+      security:
+        - rehabmatchSession: []
+      parameters:
+        - $ref: "#/components/parameters/SpecialistId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminVerificationRequest"
+      responses:
+        "200":
+          description: Updated verification
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminSpecialistVerificationEnvelope"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+
+  /api/v1/admin/reviews:
+    get:
+      tags: [Reviews]
+      summary: Review moderation queue
+      operationId: adminListReviews
+      security:
+        - rehabmatchSession: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/ReviewStatus"
+        - $ref: "#/components/parameters/AppointmentPage"
+        - $ref: "#/components/parameters/AppointmentPageSize"
+      responses:
+        "200":
+          description: Paginated reviews for moderation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminReviewListResponse"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+
+  /api/v1/admin/reviews/{id}/status:
+    patch:
+      tags: [Reviews]
+      summary: Approve or reject review
+      operationId: adminPatchReviewStatus
+      security:
+        - rehabmatchSession: []
+      parameters:
+        - $ref: "#/components/parameters/ReviewId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminReviewStatusRequest"
+            examples:
+              approve:
+                value:
+                  status: APPROVED
+      responses:
+        "200":
+          description: Updated review
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminReviewStatusEnvelope"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+
+  /api/v1/admin/appointment-requests:
+    get:
+      tags: [Consultation Requests]
+      summary: Audit list of consultation requests
+      operationId: adminListAppointmentRequests
+      security:
+        - rehabmatchSession: []
+      parameters:
+        - $ref: "#/components/parameters/AppointmentStatus"
+        - $ref: "#/components/parameters/AppointmentPage"
+        - $ref: "#/components/parameters/AppointmentPageSize"
+      responses:
+        "200":
+          description: Paginated requests (admin)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppointmentRequestListResponse"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+
+  /api/v1/admin/catalog/{type}:
+    get:
+      tags: [Catalog]
+      summary: List catalog entries (admin)
+      operationId: adminListCatalog
+      security:
+        - rehabmatchSession: []
+      parameters:
+        - $ref: "#/components/parameters/CatalogType"
+      responses:
+        "200":
+          description: Catalog rows
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CatalogListEnvelope"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+    post:
+      tags: [Catalog]
+      summary: Create catalog entry
+      operationId: adminCreateCatalog
+      security:
+        - rehabmatchSession: []
+      parameters:
+        - $ref: "#/components/parameters/CatalogType"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CatalogCreateRequest"
+      responses:
+        "201":
+          description: Created entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CatalogItemEnvelope"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+
+  /api/v1/admin/catalog/{type}/{id}:
+    patch:
+      tags: [Catalog]
+      summary: Update catalog entry
+      operationId: adminPatchCatalog
+      security:
+        - rehabmatchSession: []
+      parameters:
+        - $ref: "#/components/parameters/CatalogType"
+        - $ref: "#/components/parameters/CatalogItemId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CatalogPatchRequest"
+      responses:
+        "200":
+          description: Updated entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CatalogItemEnvelope"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+
+  /api/v1/admin/criteria:
+    get:
+      tags: [Admin]
+      summary: List scoring criteria
+      operationId: adminListCriteria
+      security:
+        - rehabmatchSession: []
+      responses:
+        "200":
+          description: All criteria (including inactive)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CriterionListEnvelope"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+
+  /api/v1/admin/criteria/{id}:
+    patch:
+      tags: [Admin]
+      summary: Update criterion metadata
+      operationId: adminPatchCriterion
+      security:
+        - rehabmatchSession: []
+      parameters:
+        - $ref: "#/components/parameters/CriterionId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CriteriaPatchRequest"
+      responses:
+        "200":
+          description: Updated criterion
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CriterionEnvelope"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+components:
+  securitySchemes:
+    rehabmatchSession:
+      type: apiKey
+      in: cookie
+      name: rehabmatch_session
+      description: Session token issued at login/register; required for protected routes.
+
+  parameters:
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    PageSize:
+      name: pageSize
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
+    AppointmentPage:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    AppointmentPageSize:
+      name: pageSize
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    RecommendationPage:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    RecommendationPageSize:
+      name: pageSize
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 50
+        default: 10
+    SpecialistId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    UserId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    ReviewId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    AppointmentRequestId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    SearchRequestId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    RecommendationId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    CriterionId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    CatalogItemId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    CatalogType:
+      name: type
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/CatalogTypeSlug"
+    AppointmentStatus:
+      name: status
+      in: query
+      schema:
+        $ref: "#/components/schemas/AppointmentRequestStatus"
+    SpecialistsQueryQ:
+      name: q
+      in: query
+      schema:
+        type: string
+        maxLength: 120
+    SpecialistsInjuryTypeId:
+      name: injuryTypeId
+      in: query
+      schema:
+        type: string
+        format: uuid
+    SpecialistsSpecializationId:
+      name: specializationId
+      in: query
+      schema:
+        type: string
+        format: uuid
+    SpecialistsCityId:
+      name: cityId
+      in: query
+      schema:
+        type: string
+        format: uuid
+    SpecialistsDistrictId:
+      name: districtId
+      in: query
+      schema:
+        type: string
+        format: uuid
+    SpecialistsMaxBudget:
+      name: maxBudget
+      in: query
+      schema:
+        type: number
+        exclusiveMinimum: true
+        minimum: 0
+    SpecialistsFormatId:
+      name: formatId
+      in: query
+      schema:
+        type: string
+        format: uuid
+    SpecialistsInclusiveOnly:
+      name: inclusiveOnly
+      in: query
+      schema:
+        type: string
+        enum: ["true", "false"]
+    SpecialistsSort:
+      name: sort
+      in: query
+      schema:
+        type: string
+        enum:
+          - price_asc
+          - price_desc
+          - experience_desc
+          - experience_asc
+          - rating_desc
+          - newest
+        default: rating_desc
+
+  responses:
+    ValidationError:
+      description: Validation failed (Zod or business rule)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ValidationErrorEnvelope"
+          examples:
+            zod:
+              value:
+                error:
+                  code: VALIDATION_ERROR
+                  message: Некоректні дані запиту
+                  details:
+                    formErrors: []
+                    fieldErrors:
+                      email: [Некоректна електронна пошта]
+    UnauthenticatedError:
+      description: Missing or invalid session
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+          examples:
+            unauth:
+              value:
+                error:
+                  code: UNAUTHENTICATED
+                  message: Потрібна авторизація
+    ForbiddenError:
+      description: Authenticated but wrong role
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+          examples:
+            forbidden:
+              value:
+                error:
+                  code: FORBIDDEN
+                  message: Недостатньо прав
+    NotFoundError:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+          examples:
+            notFound:
+              value:
+                error:
+                  code: NOT_FOUND
+                  message: Ресурс не знайдено
+    ConflictError:
+      description: Conflict with current state
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+
+  schemas:
+    ErrorResponse:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          example: VALIDATION_ERROR
+        message:
+          type: string
+        details:
+          description: Optional structured details (e.g. Zod flatten output or business context)
+          nullable: true
+
+    ErrorEnvelope:
+      type: object
+      required: [error]
+      properties:
+        error:
+          $ref: "#/components/schemas/ErrorResponse"
+
+    ValidationErrorEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/ErrorEnvelope"
+      example:
+        error:
+          code: VALIDATION_ERROR
+          message: Некоректні дані запиту
+          details:
+            formErrors: []
+            fieldErrors: {}
+
+    PaginationMeta:
+      type: object
+      required: [page, pageSize, total, totalPages]
+      properties:
+        page:
+          type: integer
+          minimum: 1
+        pageSize:
+          type: integer
+          minimum: 1
+        total:
+          type: integer
+          minimum: 0
+        totalPages:
+          type: integer
+          minimum: 0
+
+    UserRole:
+      type: string
+      enum: [PATIENT, SPECIALIST, ADMIN]
+
+    SpecialistVerificationStatus:
+      type: string
+      enum: [PENDING, APPROVED, REJECTED]
+
+    ReviewStatus:
+      type: string
+      enum: [PENDING, APPROVED, REJECTED]
+
+    AppointmentRequestStatus:
+      type: string
+      enum: [REQUESTED, ACCEPTED, DECLINED, CANCELLED]
+
+    PreferenceMode:
+      type: string
+      enum: [AHP_PAIRWISE, DIRECT_WSM]
+
+    CriterionKey:
+      type: string
+      enum: [EXPERIENCE, PRICE, RATING, LOCATION, FORMAT]
+
+    CatalogTypeSlug:
+      type: string
+      enum:
+        - injury-types
+        - specializations
+        - cities
+        - districts
+        - appointment-formats
+
+    PublicUser:
+      type: object
+      required: [id, fullName, email, role, patientId, specialistId, specialistVerificationStatus]
+      properties:
+        id:
+          type: string
+          format: uuid
+        fullName:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          $ref: "#/components/schemas/UserRole"
+        patientId:
+          type: string
+          format: uuid
+          nullable: true
+        specialistId:
+          type: string
+          format: uuid
+          nullable: true
+        specialistVerificationStatus:
+          allOf:
+            - $ref: "#/components/schemas/SpecialistVerificationStatus"
+          nullable: true
+
+    PublicUserEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: "#/components/schemas/PublicUser"
+
+    PatientMe:
+      type: object
+      required: [patientId, userId]
+      properties:
+        patientId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+
+    PatientMeEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: "#/components/schemas/PatientMe"
+
+    RegisterRequest:
+      type: object
+      required: [fullName, email, password, role]
+      properties:
+        fullName:
+          type: string
+          minLength: 2
+          maxLength: 120
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+        role:
+          type: string
+          enum: [PATIENT, SPECIALIST]
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        password:
+          type: string
+          minLength: 1
+          maxLength: 128
+
+    UpdateMeRequest:
+      type: object
+      properties:
+        fullName:
+          type: string
+          minLength: 2
+          maxLength: 120
+        phone:
+          type: string
+          maxLength: 32
+          nullable: true
+
+    IdName:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+
+    CatalogItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+
+    PublicCatalog:
+      type: object
+      properties:
+        specializations:
+          type: array
+          items:
+            $ref: "#/components/schemas/CatalogItem"
+        injuryTypes:
+          type: array
+          items:
+            $ref: "#/components/schemas/CatalogItem"
+        cities:
+          type: array
+          items:
+            $ref: "#/components/schemas/CatalogItem"
+        districts:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+              name:
+                type: string
+              cityId:
+                type: string
+                format: uuid
+        formats:
+          type: array
+          items:
+            $ref: "#/components/schemas/CatalogItem"
+        criteria:
+          type: array
+          items:
+            $ref: "#/components/schemas/Criterion"
+
+    PublicCatalogEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: "#/components/schemas/PublicCatalog"
+
+    SpecialistService:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        price:
+          type: number
+
+    PublicSpecialist:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        fullName:
+          type: string
+        photoUrl:
+          type: string
+          nullable: true
+        experienceYears:
+          type: integer
+        pricePerSession:
+          type: number
+        description:
+          type: string
+        city:
+          allOf:
+            - $ref: "#/components/schemas/IdName"
+          nullable: true
+        district:
+          allOf:
+            - $ref: "#/components/schemas/IdName"
+          nullable: true
+        specializations:
+          type: array
+          items:
+            $ref: "#/components/schemas/IdName"
+        injuryTypes:
+          type: array
+          items:
+            $ref: "#/components/schemas/IdName"
+        formats:
+          type: array
+          items:
+            $ref: "#/components/schemas/IdName"
+        services:
+          type: array
+          items:
+            $ref: "#/components/schemas/SpecialistService"
+        ratingAvg:
+          type: number
+          nullable: true
+        ratingCount:
+          type: integer
+        inclusiveSpace:
+          type: boolean
+        isDemo:
+          type: boolean
+        verificationStatus:
+          $ref: "#/components/schemas/SpecialistVerificationStatus"
+
+    PublicSpecialistCard:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        fullName:
+          type: string
+        photoUrl:
+          type: string
+          nullable: true
+        experienceYears:
+          type: integer
+        pricePerSession:
+          type: number
+        city:
+          allOf:
+            - $ref: "#/components/schemas/IdName"
+          nullable: true
+        district:
+          allOf:
+            - $ref: "#/components/schemas/IdName"
+          nullable: true
+        specializations:
+          type: array
+          items:
+            $ref: "#/components/schemas/IdName"
+        formats:
+          type: array
+          items:
+            $ref: "#/components/schemas/IdName"
+        ratingAvg:
+          type: number
+          nullable: true
+        ratingCount:
+          type: integer
+        inclusiveSpace:
+          type: boolean
+        isDemo:
+          type: boolean
+
+    PublicSpecialistEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: "#/components/schemas/PublicSpecialist"
+
+    PublicSpecialistCardListResponse:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/PublicSpecialistCard"
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"
+
+    UpdateSpecialistProfileRequest:
+      type: object
+      properties:
+        fullName:
+          type: string
+          minLength: 2
+          maxLength: 120
+        description:
+          type: string
+          maxLength: 5000
+        experienceYears:
+          type: integer
+          minimum: 0
+          maximum: 60
+        pricePerSession:
+          type: number
+          minimum: 0
+          maximum: 100000
+        cityId:
+          type: string
+          format: uuid
+          nullable: true
+        districtId:
+          type: string
+          format: uuid
+          nullable: true
+        inclusiveSpace:
+          type: boolean
+        photoUrl:
+          type: string
+          format: uri
+          maxLength: 500
+          nullable: true
+        specializationIds:
+          type: array
+          minItems: 1
+          maxItems: 5
+          items:
+            type: string
+            format: uuid
+        injuryTypeIds:
+          type: array
+          minItems: 1
+          maxItems: 10
+          items:
+            type: string
+            format: uuid
+        formatIds:
+          type: array
+          minItems: 1
+          maxItems: 3
+          items:
+            type: string
+            format: uuid
+
+    ReplaceServicesRequest:
+      type: object
+      required: [services]
+      properties:
+        services:
+          type: array
+          maxItems: 20
+          items:
+            type: object
+            required: [name, price]
+            properties:
+              name:
+                type: string
+                minLength: 2
+                maxLength: 120
+              description:
+                type: string
+                maxLength: 1000
+              price:
+                type: number
+                minimum: 0
+                maximum: 100000
+
+    CreateReviewRequest:
+      type: object
+      required: [rating, comment]
+      properties:
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        comment:
+          type: string
+          minLength: 3
+          maxLength: 2000
+
+    PublicReview:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        rating:
+          type: integer
+        comment:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        authorName:
+          type: string
+
+    PublicReviewListResponse:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/PublicReview"
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"
+
+    OwnReview:
+      type: object
+      nullable: true
+      properties:
+        id:
+          type: string
+          format: uuid
+        rating:
+          type: integer
+        comment:
+          type: string
+        status:
+          $ref: "#/components/schemas/ReviewStatus"
+
+    OwnReviewEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: "#/components/schemas/OwnReview"
+
+    ReviewUpsertResult:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        rating:
+          type: integer
+        comment:
+          type: string
+        status:
+          $ref: "#/components/schemas/ReviewStatus"
+        message:
+          type: string
+
+    ReviewUpsertEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: "#/components/schemas/ReviewUpsertResult"
+
+    FiltersSnapshot:
+      type: object
+      required: [injuryTypeId, maxBudget, cityOnly, inclusiveOnly, formatStrict]
+      properties:
+        injuryTypeId:
+          type: string
+          format: uuid
+        specializationId:
+          type: string
+          format: uuid
+          nullable: true
+        cityId:
+          type: string
+          format: uuid
+          nullable: true
+        districtId:
+          type: string
+          format: uuid
+          nullable: true
+        formatId:
+          type: string
+          format: uuid
+          nullable: true
+        maxBudget:
+          type: number
+        cityOnly:
+          type: boolean
+        inclusiveOnly:
+          type: boolean
+        formatStrict:
+          type: boolean
+
+    CreateSearchRequest:
+      type: object
+      required: [injuryTypeId, maxBudget, preferenceMode]
+      properties:
+        injuryTypeId:
+          type: string
+          format: uuid
+        specializationId:
+          type: string
+          format: uuid
+        cityId:
+          type: string
+          format: uuid
+          nullable: true
+        districtId:
+          type: string
+          format: uuid
+          nullable: true
+        formatId:
+          type: string
+          format: uuid
+          nullable: true
+        maxBudget:
+          type: number
+          exclusiveMinimum: true
+          minimum: 0
+          maximum: 100000
+        cityOnly:
+          type: boolean
+          default: false
+        inclusiveOnly:
+          type: boolean
+          default: false
+        formatStrict:
+          type: boolean
+          default: false
+        preferenceMode:
+          $ref: "#/components/schemas/PreferenceMode"
+
+    SearchRequestSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        preferenceMode:
+          $ref: "#/components/schemas/PreferenceMode"
+        maxBudget:
+          type: number
+        cityOnly:
+          type: boolean
+        inclusiveOnly:
+          type: boolean
+        filtersSnapshot:
+          $ref: "#/components/schemas/FiltersSnapshot"
+        createdAt:
+          type: string
+          format: date-time
+
+    SearchRequestSummaryEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: "#/components/schemas/SearchRequestSummary"
+
+    SearchRequestDetail:
+      allOf:
+        - $ref: "#/components/schemas/SearchRequestSummary"
+        - type: object
+          properties:
+            consistencyRatio:
+              type: number
+              nullable: true
+            comparisons:
+              type: array
+              items:
+                $ref: "#/components/schemas/PairwiseComparison"
+            priorities:
+              type: array
+              items:
+                type: object
+                properties:
+                  key:
+                    $ref: "#/components/schemas/CriterionKey"
+                  weight:
+                    type: number
+                  rawValue:
+                    type: number
+                    nullable: true
+            latestRecommendationId:
+              type: string
+              format: uuid
+              nullable: true
+
+    SearchRequestDetailEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: "#/components/schemas/SearchRequestDetail"
+
+    PairwiseComparison:
+      type: object
+      required: [criterionA, criterionB, value]
+      properties:
+        criterionA:
+          $ref: "#/components/schemas/CriterionKey"
+        criterionB:
+          $ref: "#/components/schemas/CriterionKey"
+        value:
+          type: number
+          exclusiveMinimum: true
+          minimum: 0
+
+    DirectPriorities:
+      type: object
+      required: [EXPERIENCE, PRICE, RATING, LOCATION, FORMAT]
+      properties:
+        EXPERIENCE:
+          type: integer
+          minimum: 1
+          maximum: 9
+        PRICE:
+          type: integer
+          minimum: 1
+          maximum: 9
+        RATING:
+          type: integer
+          minimum: 1
+          maximum: 9
+        LOCATION:
+          type: integer
+          minimum: 1
+          maximum: 9
+        FORMAT:
+          type: integer
+          minimum: 1
+          maximum: 9
+
+    AhpCalculateRequest:
+      oneOf:
+        - type: object
+          required: [mode, comparisons]
+          properties:
+            mode:
+              type: string
+              enum: [AHP_PAIRWISE]
+            keys:
+              type: array
+              minItems: 5
+              maxItems: 5
+              items:
+                $ref: "#/components/schemas/CriterionKey"
+            comparisons:
+              type: array
+              minItems: 10
+              maxItems: 10
+              items:
+                $ref: "#/components/schemas/PairwiseComparison"
+        - type: object
+          required: [mode, priorities]
+          properties:
+            mode:
+              type: string
+              enum: [DIRECT_WSM]
+            priorities:
+              $ref: "#/components/schemas/DirectPriorities"
+
+    AhpCalculateResult:
+      type: object
+      properties:
+        mode:
+          type: string
+        algorithmVersion:
+          type: string
+        weights:
+          type: object
+          additionalProperties:
+            type: number
+        lambdaMax:
+          type: number
+          nullable: true
+        ci:
+          type: number
+          nullable: true
+        cr:
+          type: number
+          nullable: true
+        isConsistent:
+          type: boolean
+        consistencyThreshold:
+          type: number
+          nullable: true
+
+    AhpCalculateEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: "#/components/schemas/AhpCalculateResult"
+
+    CreateRecommendationRequest:
+      oneOf:
+        - type: object
+          required: [searchRequestId, mode, comparisons]
+          properties:
+            searchRequestId:
+              type: string
+              format: uuid
+            mode:
+              type: string
+              enum: [AHP_PAIRWISE]
+            comparisons:
+              type: array
+              minItems: 10
+              maxItems: 10
+              items:
+                $ref: "#/components/schemas/PairwiseComparison"
+            limit:
+              type: integer
+              minimum: 1
+              maximum: 50
+              default: 20
+            idempotencyKey:
+              type: string
+              maxLength: 120
+        - type: object
+          required: [searchRequestId, mode, priorities]
+          properties:
+            searchRequestId:
+              type: string
+              format: uuid
+            mode:
+              type: string
+              enum: [DIRECT_WSM]
+            priorities:
+              $ref: "#/components/schemas/DirectPriorities"
+            limit:
+              type: integer
+              minimum: 1
+              maximum: 50
+              default: 20
+            idempotencyKey:
+              type: string
+              maxLength: 120
+
+    RecommendationRankedItem:
+      type: object
+      properties:
+        rankPosition:
+          type: integer
+        specialistId:
+          type: string
+          format: uuid
+        matchScore:
+          type: number
+        matchScorePercent:
+          type: number
+        fullName:
+          type: string
+        city:
+          type: string
+          nullable: true
+        experienceYears:
+          type: integer
+        pricePerSession:
+          type: number
+        ratingAvg:
+          type: number
+        ratingCount:
+          type: integer
+        specializations:
+          type: array
+          items:
+            type: string
+        factors:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        explanation:
+          type: array
+          items:
+            type: string
+
+    RecommendationDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        mode:
+          $ref: "#/components/schemas/PreferenceMode"
+        algorithmVersion:
+          type: string
+        consistencyRatio:
+          type: number
+          nullable: true
+        weights:
+          type: object
+          additionalProperties:
+            type: number
+        createdAt:
+          type: string
+          format: date-time
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/RecommendationRankedItem"
+
+    RecommendationDetailEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: "#/components/schemas/RecommendationDetail"
+
+    RecommendationSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        mode:
+          $ref: "#/components/schemas/PreferenceMode"
+        algorithmVersion:
+          type: string
+        injuryType:
+          type: string
+        city:
+          type: string
+          nullable: true
+        maxBudget:
+          type: number
+        filtersSnapshot:
+          $ref: "#/components/schemas/FiltersSnapshot"
+        weights:
+          type: object
+          additionalProperties:
+            type: number
+
+    RecommendationSummaryListResponse:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/RecommendationSummary"
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"
+
+    CreateAppointmentRequest:
+      type: object
+      required: [specialistId, preferredAt]
+      properties:
+        specialistId:
+          type: string
+          format: uuid
+        preferredAt:
+          type: string
+          format: date-time
+        note:
+          type: string
+          maxLength: 500
+
+    AppointmentRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          $ref: "#/components/schemas/AppointmentRequestStatus"
+        preferredAt:
+          type: string
+          format: date-time
+        note:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        patientName:
+          type: string
+        specialistName:
+          type: string
+
+    AppointmentRequestEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: "#/components/schemas/AppointmentRequest"
+
+    AppointmentRequestListResponse:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/AppointmentRequest"
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"
+
+    SpecialistAppointmentStatusRequest:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [ACCEPTED, DECLINED]
+
+    HealthOk:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          example: ok
+
+    HealthOkEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: "#/components/schemas/HealthOk"
+
+    HealthDatabaseOk:
+      type: object
+      required: [status, database]
+      properties:
+        status:
+          type: string
+        database:
+          type: string
+          example: connected
+
+    HealthDatabaseOkEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: "#/components/schemas/HealthDatabaseOk"
+
+    AdminSummary:
+      type: object
+      properties:
+        users:
+          type: integer
+        specialists:
+          type: integer
+        pendingSpecialists:
+          type: integer
+        pendingReviews:
+          type: integer
+
+    AdminSummaryEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: "#/components/schemas/AdminSummary"
+
+    AdminUser:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        fullName:
+          type: string
+        email:
+          type: string
+        role:
+          $ref: "#/components/schemas/UserRole"
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    AdminUserEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: "#/components/schemas/AdminUser"
+
+    AdminUserListResponse:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/AdminUser"
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"
+
+    AdminUserStatusRequest:
+      type: object
+      required: [isActive]
+      properties:
+        isActive:
+          type: boolean
+
+    AdminSpecialistListItem:
+      allOf:
+        - $ref: "#/components/schemas/PublicSpecialist"
+        - type: object
+          properties:
+            userId:
+              type: string
+              format: uuid
+            updatedAt:
+              type: string
+              format: date-time
+
+    AdminSpecialistListResponse:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/AdminSpecialistListItem"
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"
+
+    AdminVerificationRequest:
+      type: object
+      required: [status]
+      properties:
+        status:
+          $ref: "#/components/schemas/SpecialistVerificationStatus"
+
+    AdminSpecialistVerificationEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            verificationStatus:
+              $ref: "#/components/schemas/SpecialistVerificationStatus"
+
+    AdminReview:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        rating:
+          type: integer
+        comment:
+          type: string
+        status:
+          $ref: "#/components/schemas/ReviewStatus"
+        createdAt:
+          type: string
+          format: date-time
+        patientName:
+          type: string
+        specialistName:
+          type: string
+        specialistId:
+          type: string
+          format: uuid
+
+    AdminReviewListResponse:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/AdminReview"
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"
+
+    AdminReviewStatusRequest:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [APPROVED, REJECTED]
+
+    AdminReviewStatusEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            status:
+              $ref: "#/components/schemas/ReviewStatus"
+            specialistId:
+              type: string
+              format: uuid
+
+    CatalogCreateRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 120
+        description:
+          type: string
+          maxLength: 500
+        cityId:
+          type: string
+          format: uuid
+          description: Required when type is districts
+
+    CatalogPatchRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 120
+        description:
+          type: string
+          maxLength: 500
+
+    CatalogListEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+
+    CatalogItemEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          additionalProperties: true
+
+    Criterion:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        key:
+          $ref: "#/components/schemas/CriterionKey"
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        isActive:
+          type: boolean
+
+    CriterionListEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Criterion"
+
+    CriterionEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          $ref: "#/components/schemas/Criterion"
+
+    CriteriaPatchRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 80
+        description:
+          type: string
+          maxLength: 500
+        isActive:
+          type: boolean
