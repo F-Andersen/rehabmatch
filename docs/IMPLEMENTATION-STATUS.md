@@ -1,39 +1,39 @@
 # Статус реалізації RehabMatch MVP
 
-Оновлено: **2026-10-17** (M4).
+Оновлено: **2026-10-17** (M5).
 
 | Етап | Статус | Примітки |
 |---|---|---|
 | M1A — Bootstrap | DONE | |
 | M1B — Prisma/seed | DONE | |
 | M2 — Auth & RBAC | DONE | |
-| M3 — Каталог / профілі / модерація | DONE | |
-| M4 — AHP / WSM engine | **DONE** | Pure math + `POST /ahp/calculate` preview |
-| M5 — Підбір (persist) | NOT STARTED | |
-| M6 — Відгуки/заявки/admin | NOT STARTED | |
-| M7 — QA/E2E | PARTIAL | Auth + catalog E2E; AHP wizard — M5 |
+| M3 — Каталог / модерація | DONE | |
+| M4 — AHP / WSM engine | DONE | |
+| M5 — Персоналізований підбір | **DONE** | SearchRequest, збереження Recommendation, UI wizard |
+| M6 — Відгуки/заявки | NOT STARTED | |
 
-## M4 — перевірки (2026-10-17)
+## M5 — перевірки (2026-10-17)
 
 | Перевірка | Результат |
 |---|---|
 | `npm run typecheck` | OK |
-| `npm test` (server) | OK — 51 тестів (алгоритми + M1–M3 regression) |
+| `npm test` | OK — 57 тестів (включно demo-scenarios) |
 | `npm run build` | OK |
-| `GET /api/v1/health/database` | OK (при запущеному API) |
+| `npm run e2e` | OK — 4 тести (auth, catalog, matching) |
 
-## Алгоритм
+## API (M5)
 
-- Версія: `ahp-gm-wsm-fixed-v1`
-- Режими: `AHP_PAIRWISE`, `DIRECT_WSM`
-- Модулі: `server/src/algorithms/` (ahp, normalization, scoring, ranking, explanation)
-- Збереження рекомендацій / search-requests — **M5**
+- `POST /api/v1/search-requests` — створення пошукового запиту (PATIENT)
+- `GET /api/v1/search-requests/:id` — власний запит + пріоритети/порівняння
+- `POST /api/v1/recommendations` — розрахунок + збереження (AHP/WSM)
+- `GET /api/v1/recommendations/:id` — збережений результат
+- `GET /api/v1/recommendations` — історія (paged)
+- `POST /api/v1/ahp/calculate` — preview (M4)
 
-## API (M4)
+## Frontend (M5)
 
-- `POST /api/v1/ahp/calculate` (PATIENT) — preview ваг, CI/CR без persistence
-
-## Публічний API (M3)
-
-- `GET /api/v1/catalog`, `GET /api/v1/specialists`, …
-- `GET/PUT /api/v1/specialist/me`, admin moderation
+- `/matching/new` — параметри пошуку
+- `/matching/:id/criteria` — AHP wizard / DIRECT_WSM
+- `/recommendations/:id` — результати A.5
+- `/recommendations` — історія
+- `/dashboard` — швидкий доступ до підбору
