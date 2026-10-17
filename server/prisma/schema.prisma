@@ -101,8 +101,8 @@ model Specialist {
   id                 String                        @id @default(uuid()) @db.Uuid
   userId             String                        @unique @db.Uuid
   user               User                          @relation(fields: [userId], references: [id])
-  cityId             String                        @db.Uuid
-  city               City                          @relation(fields: [cityId], references: [id])
+  cityId             String?                       @db.Uuid
+  city               City?                         @relation(fields: [cityId], references: [id])
   districtId         String?                       @db.Uuid
   district           District?                     @relation(fields: [districtId], references: [id])
   experienceYears    Int                           @default(0)
