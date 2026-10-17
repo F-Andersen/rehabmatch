@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../features/auth/AuthProvider";
 import { fetchRecommendations } from "../features/matching/api";
 import {
@@ -68,12 +68,7 @@ export function PatientDashboardPage() {
 }
 
 export function MatchingResultsPage() {
-  return (
-    <PlaceholderPage
-      title="Результати підбору"
-      description="Після збереження рекомендації відкривається сторінка /recommendations/:id."
-    />
-  );
+  return <Navigate to="/recommendations" replace />;
 }
 
 export function RecommendationsHistoryPage() {
