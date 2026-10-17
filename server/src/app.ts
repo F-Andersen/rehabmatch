@@ -14,6 +14,8 @@ import { catalogRouter } from "./routes/v1/catalog.js";
 import { specialistsRouter } from "./routes/v1/specialists.js";
 import { specialistPortalRouter } from "./routes/v1/specialist-portal.js";
 import { ahpRouter } from "./routes/v1/ahp.js";
+import { searchRequestsRouter } from "./routes/v1/search-requests.js";
+import { recommendationsRouter } from "./routes/v1/recommendations.js";
 
 export function createApp() {
   const app = express();
@@ -40,6 +42,8 @@ export function createApp() {
   app.use("/api/v1", specialistsRouter);
   app.use("/api/v1/specialist", specialistPortalRouter);
   app.use("/api/v1/ahp", ahpRouter);
+  app.use("/api/v1/search-requests", searchRequestsRouter);
+  app.use("/api/v1/recommendations", recommendationsRouter);
 
   app.use(errorHandler);
 
