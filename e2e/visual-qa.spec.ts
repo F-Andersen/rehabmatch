@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+const artifactDir = "e2e/artifacts/visual-qa";
+
 const pages = [
   { name: "home", path: "/" },
   { name: "login", path: "/login" },
@@ -12,7 +14,7 @@ for (const entry of pages) {
     await page.goto(entry.path);
     await expect(page.locator("body")).toBeVisible();
     await page.screenshot({
-      path: `docs/thesis/screenshots/${entry.name}-${test.info().project.name}.png`,
+      path: `${artifactDir}/${entry.name}-${test.info().project.name}.png`,
       fullPage: true,
     });
   });
@@ -23,7 +25,7 @@ test("visual specialist profile", async ({ page }) => {
   await page.getByRole("link", { name: "Переглянути профіль" }).first().click();
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   await page.screenshot({
-    path: `docs/thesis/screenshots/specialist-profile-${test.info().project.name}.png`,
+    path: `${artifactDir}/specialist-profile-${test.info().project.name}.png`,
     fullPage: true,
   });
 });

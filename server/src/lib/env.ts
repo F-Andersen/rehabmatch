@@ -43,12 +43,22 @@ function readHours(name: string, fallback: number): number {
   return parsed;
 }
 
+const nodeEnv = process.env.NODE_ENV ?? "development";
+
+/** True only when explicitly opted in and never in production (keeps prod rate limits strict). */
+const e2eMode =
+  process.env.REHABMATCH_E2E === "1" && nodeEnv !== "production";
+
 export const env = {
-  nodeEnv: process.env.NODE_ENV ?? "development",
-  isProduction: process.env.NODE_ENV === "production",
+  nodeEnv,
+  isProduction: nodeEnv === "production",
+  /** Playwright / isolated API process: higher auth quota, separate DB via E2E_DATABASE_URL. */
+  e2eMode,
   apiPort: readPort("API_PORT", 3001),
   clientOrigin: process.env.CLIENT_ORIGIN ?? "http://localhost:5173",
   sessionSecret: process.env.SESSION_SECRET ?? "dev-only-insecure-session-secret",
   sessionTtlHours: readHours("SESSION_TTL_HOURS", 168),
   sessionCookieName: "rehabmatch_session",
+  authRateLimitWindowMs: 15 * 60 * 1000,
+  authRateLimitMax: e2eMode ? 10_000 : 30,
 };

@@ -4,14 +4,15 @@ import { toPublicUserDto } from "../../lib/user-dto.js";
 import { rateLimit } from "../../middleware/rate-limit.js";
 import { requireAuth } from "../../middleware/auth.js";
 import { loginSchema, registerSchema } from "../../modules/auth/auth.schemas.js";
+import { env } from "../../lib/env.js";
 import { loadUserById, loginUser, logoutSession, registerUser } from "../../modules/auth/auth.service.js";
 
 export const authRouter = Router();
 
 const authRateLimit = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 30,
-  keyPrefix: "auth",
+  windowMs: env.authRateLimitWindowMs,
+  max: env.authRateLimitMax,
+  keyPrefix: env.e2eMode ? "auth:e2e" : "auth",
 });
 
 authRouter.post("/register", authRateLimit, async (req, res, next) => {

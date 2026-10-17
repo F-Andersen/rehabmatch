@@ -1,7 +1,10 @@
 import type { APIRequestContext, Page } from "@playwright/test";
 
-export const CLIENT_ORIGIN = "http://localhost:5173";
-export const API_BASE = "http://localhost:3001/api/v1";
+const clientPort = process.env.CLIENT_PORT ?? "5173";
+const apiPort = process.env.API_PORT ?? "3001";
+
+export const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN ?? `http://localhost:${clientPort}`;
+export const API_BASE = `http://localhost:${apiPort}/api/v1`;
 
 export function uniqueEmail(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 10_000)}@example.test`;

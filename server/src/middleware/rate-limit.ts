@@ -3,9 +3,15 @@ import { AppError } from "../lib/http-errors.js";
 
 type Bucket = { count: number; resetAt: number };
 
-const buckets = new Map<string, Bucket>();
+const defaultBuckets = new Map<string, Bucket>();
 
-export function rateLimit(options: { windowMs: number; max: number; keyPrefix: string }) {
+export function rateLimit(options: {
+  windowMs: number;
+  max: number;
+  keyPrefix: string;
+  store?: Map<string, Bucket>;
+}) {
+  const buckets = options.store ?? defaultBuckets;
   return (req: Request, _res: Response, next: NextFunction): void => {
     const ip = req.ip ?? req.socket.remoteAddress ?? "unknown";
     const key = `${options.keyPrefix}:${ip}`;

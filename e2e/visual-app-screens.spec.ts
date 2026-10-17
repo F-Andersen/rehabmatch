@@ -18,11 +18,14 @@ async function shot(page: import("@playwright/test").Page, name: string, viewpor
   });
 }
 
-for (const viewport of [
-  { tag: "desktop-1440", width: 1440, height: 900 },
-  { tag: "mobile-375", width: 375, height: 812 },
-] as const) {
-  test(`thesis app screens ${viewport.tag}`, async ({ page }) => {
+test.describe("thesis app screens", () => {
+  test.describe.configure({ mode: "serial" });
+
+  for (const viewport of [
+    { tag: "desktop-1440", width: 1440, height: 900 },
+    { tag: "mobile-375", width: 375, height: 812 },
+  ] as const) {
+    test(`${viewport.tag}`, async ({ page }) => {
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
 
     const patientEmail = uniqueEmail(`vis-p-${viewport.tag}`);
@@ -76,5 +79,6 @@ for (const viewport of [
       await page.goto("/admin/reviews");
       await shot(page, "admin-reviews", viewport.tag);
     }
-  });
-}
+    });
+  }
+});
