@@ -1,8 +1,26 @@
+import { useAuth } from "../features/auth/AuthProvider";
 import { PlaceholderPage } from "../components/PlaceholderPage";
 
 export function PatientDashboardPage() {
+  const { user } = useAuth();
+
   return (
-    <PlaceholderPage title="Кабінет пацієнта" description="Особистий кабінет пацієнта — майбутній етап." />
+    <section className="rounded-xl border border-border bg-surface p-8 shadow-sm">
+      <h1 className="text-2xl font-semibold text-text">Кабінет пацієнта</h1>
+      <p className="mt-3 text-text-muted">
+        Вітаємо, {user?.fullName}. Тут з&apos;являться збережені пошуки, рекомендації та заявки (M5–M6).
+      </p>
+      <dl className="mt-6 grid gap-3 text-sm sm:grid-cols-2">
+        <div className="rounded-lg bg-surface-tint p-3">
+          <dt className="text-text-muted">Email</dt>
+          <dd className="font-medium text-text">{user?.email}</dd>
+        </div>
+        <div className="rounded-lg bg-surface-tint p-3">
+          <dt className="text-text-muted">ID пацієнта</dt>
+          <dd className="font-medium text-text">{user?.patientId ?? "—"}</dd>
+        </div>
+      </dl>
+    </section>
   );
 }
 
@@ -40,9 +58,7 @@ export function RecommendationsHistoryPage() {
 }
 
 export function MyRequestsPage() {
-  return (
-    <PlaceholderPage title="Мої заявки" description="Заявки на консультацію — етап M6." />
-  );
+  return <PlaceholderPage title="Мої заявки" description="Заявки на консультацію — етап M6." />;
 }
 
 export function SettingsPage() {

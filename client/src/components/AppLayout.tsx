@@ -1,4 +1,6 @@
 import { NavLink, Outlet } from "react-router-dom";
+import { useAuth } from "../features/auth/AuthProvider";
+import { dashboardPathForRole } from "../lib/role-routes";
 
 const publicLinks = [
   { to: "/", label: "Головна", end: true },
@@ -6,11 +8,6 @@ const publicLinks = [
   { to: "/about", label: "Про систему" },
   { to: "/how-it-works", label: "Як це працює" },
   { to: "/contacts", label: "Контакти" },
-];
-
-const authLinks = [
-  { to: "/login", label: "Увійти" },
-  { to: "/register", label: "Зареєструватися" },
 ];
 
 function navClassName({ isActive }: { isActive: boolean }) {
@@ -21,6 +18,8 @@ function navClassName({ isActive }: { isActive: boolean }) {
 }
 
 export function AppLayout() {
+  const { user, isLoading, logout } = useAuth();
+
   return (
     <div className="flex min-h-screen flex-col">
       <header className="border-b border-border bg-surface">
@@ -35,12 +34,35 @@ export function AppLayout() {
               </NavLink>
             ))}
           </nav>
-          <div className="flex items-center gap-1">
-            {authLinks.map((link) => (
-              <NavLink key={link.to} to={link.to} className={navClassName}>
-                {link.label}
-              </NavLink>
-            ))}
+          <div className="flex items-center gap-2">
+            {isLoading ? (
+              <span className="text-sm text-text-muted">…</span>
+            ) : user ? (
+              <>
+                <NavLink to={dashboardPathForRole(user.role)} className={navClassName}>
+                  {user.fullName}
+                </NavLink>
+                <button
+                  type="button"
+                  onClick={() => void logout()}
+                  className="rounded-lg px-3 py-2 text-sm font-medium text-text-muted hover:bg-surface-tint hover:text-text"
+                >
+                  Вийти
+                </button>
+              </>
+            ) : (
+              <>
+                <NavLink to="/login" className={navClassName}>
+                  Увійти
+                </NavLink>
+                <NavLink
+                  to="/register"
+                  className="rounded-lg bg-brand-600 px-3 py-2 text-sm font-medium text-white hover:bg-brand-700"
+                >
+                  Зареєструватися
+                </NavLink>
+              </>
+            )}
           </div>
         </div>
       </header>

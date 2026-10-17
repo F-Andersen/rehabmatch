@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { AppLayout } from "./components/AppLayout";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 import {
   AdminCriteriaPage,
   AdminDictionariesPage,
@@ -9,7 +10,8 @@ import {
   AdminSpecialistsPage,
   AdminUsersPage,
 } from "./pages/AdminPages";
-import { LoginPage, RegisterPage } from "./pages/AuthPages";
+import { LoginPage } from "./pages/auth/LoginPage";
+import { RegisterPage } from "./pages/auth/RegisterPage";
 import { HomePage } from "./pages/HomePage";
 import {
   MatchingCriteriaPage,
@@ -42,25 +44,144 @@ export default function App() {
           <Route path="how-it-works" element={<HowItWorksPage />} />
           <Route path="contacts" element={<ContactsPage />} />
 
-          <Route path="dashboard" element={<PatientDashboardPage />} />
-          <Route path="matching/new" element={<MatchingNewPage />} />
-          <Route path="matching/:id/criteria" element={<MatchingCriteriaPage />} />
-          <Route path="matching/:id/results" element={<MatchingResultsPage />} />
-          <Route path="recommendations" element={<RecommendationsHistoryPage />} />
-          <Route path="my-requests" element={<MyRequestsPage />} />
-          <Route path="settings" element={<SettingsPage />} />
+          <Route
+            path="dashboard"
+            element={
+              <ProtectedRoute roles={["PATIENT"]}>
+                <PatientDashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="matching/new"
+            element={
+              <ProtectedRoute roles={["PATIENT"]}>
+                <MatchingNewPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="matching/:id/criteria"
+            element={
+              <ProtectedRoute roles={["PATIENT"]}>
+                <MatchingCriteriaPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="matching/:id/results"
+            element={
+              <ProtectedRoute roles={["PATIENT"]}>
+                <MatchingResultsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="recommendations"
+            element={
+              <ProtectedRoute roles={["PATIENT"]}>
+                <RecommendationsHistoryPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="my-requests"
+            element={
+              <ProtectedRoute roles={["PATIENT"]}>
+                <MyRequestsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="settings"
+            element={
+              <ProtectedRoute roles={["PATIENT", "SPECIALIST", "ADMIN"]}>
+                <SettingsPage />
+              </ProtectedRoute>
+            }
+          />
 
-          <Route path="specialist/dashboard" element={<SpecialistDashboardPage />} />
-          <Route path="specialist/profile/edit" element={<SpecialistProfileEditPage />} />
-          <Route path="specialist/requests" element={<SpecialistRequestsPage />} />
+          <Route
+            path="specialist/dashboard"
+            element={
+              <ProtectedRoute roles={["SPECIALIST"]}>
+                <SpecialistDashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="specialist/profile/edit"
+            element={
+              <ProtectedRoute roles={["SPECIALIST"]}>
+                <SpecialistProfileEditPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="specialist/requests"
+            element={
+              <ProtectedRoute roles={["SPECIALIST"]}>
+                <SpecialistRequestsPage />
+              </ProtectedRoute>
+            }
+          />
 
-          <Route path="admin" element={<AdminHomePage />} />
-          <Route path="admin/users" element={<AdminUsersPage />} />
-          <Route path="admin/specialists" element={<AdminSpecialistsPage />} />
-          <Route path="admin/reviews" element={<AdminReviewsPage />} />
-          <Route path="admin/dictionaries" element={<AdminDictionariesPage />} />
-          <Route path="admin/criteria" element={<AdminCriteriaPage />} />
-          <Route path="admin/requests" element={<AdminRequestsPage />} />
+          <Route
+            path="admin"
+            element={
+              <ProtectedRoute roles={["ADMIN"]}>
+                <AdminHomePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="admin/users"
+            element={
+              <ProtectedRoute roles={["ADMIN"]}>
+                <AdminUsersPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="admin/specialists"
+            element={
+              <ProtectedRoute roles={["ADMIN"]}>
+                <AdminSpecialistsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="admin/reviews"
+            element={
+              <ProtectedRoute roles={["ADMIN"]}>
+                <AdminReviewsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="admin/dictionaries"
+            element={
+              <ProtectedRoute roles={["ADMIN"]}>
+                <AdminDictionariesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="admin/criteria"
+            element={
+              <ProtectedRoute roles={["ADMIN"]}>
+                <AdminCriteriaPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="admin/requests"
+            element={
+              <ProtectedRoute roles={["ADMIN"]}>
+                <AdminRequestsPage />
+              </ProtectedRoute>
+            }
+          />
         </Route>
       </Routes>
     </BrowserRouter>
