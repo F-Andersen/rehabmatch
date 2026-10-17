@@ -76,6 +76,12 @@ describe("Auth integration", () => {
     expect(res.status).toBe(201);
     expect(res.body.data.role).toBe("SPECIALIST");
     expect(res.body.data.specialistVerificationStatus).toBe("PENDING");
+
+    const user = await prisma.user.findUnique({
+      where: { email: email.toLowerCase() },
+      include: { specialist: true },
+    });
+    expect(user?.specialist?.cityId).toBeNull();
   });
 
   it("AUTH-03 login succeeds", async () => {
