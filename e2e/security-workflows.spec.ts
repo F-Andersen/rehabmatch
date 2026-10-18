@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { API_BASE, CLIENT_ORIGIN, registerPatient, uniqueEmail } from "./helpers";
+import { apiBase, clientOrigin, registerPatient, uniqueEmail } from "./helpers";
 
 test("guest is redirected from protected dashboard", async ({ page }) => {
   await page.goto("/dashboard");
@@ -18,8 +18,8 @@ test("logout revokes session for private API", async ({ page }) => {
   const password = "E2EPass12345!";
   await registerPatient(page, email, password);
 
-  const meBefore = await page.request.get(`${API_BASE}/auth/me`, {
-    headers: { Origin: CLIENT_ORIGIN },
+  const meBefore = await page.request.get(`${apiBase()}/auth/me`, {
+    headers: { Origin: clientOrigin() },
   });
   expect(meBefore.status()).toBe(200);
 
@@ -27,15 +27,15 @@ test("logout revokes session for private API", async ({ page }) => {
   await page.getByRole("button", { name: "Вийти" }).click();
   await expect(page).toHaveURL(/\/login$/);
 
-  const meAfter = await page.request.get(`${API_BASE}/auth/me`, {
-    headers: { Origin: CLIENT_ORIGIN },
+  const meAfter = await page.request.get(`${apiBase()}/auth/me`, {
+    headers: { Origin: clientOrigin() },
   });
   expect(meAfter.status()).toBe(401);
 });
 
 test("unauthenticated recommendation API returns 401", async ({ request }) => {
-  const res = await request.get(`${API_BASE}/recommendations`, {
-    headers: { Origin: CLIENT_ORIGIN },
+  const res = await request.get(`${apiBase()}/recommendations`, {
+    headers: { Origin: clientOrigin() },
   });
   expect(res.status()).toBe(401);
 });

@@ -1,10 +1,14 @@
 import type { APIRequestContext, Page } from "@playwright/test";
 
-const clientPort = process.env.CLIENT_PORT ?? "5173";
-const apiPort = process.env.API_PORT ?? "3001";
+export function clientOrigin() {
+  const clientPort = process.env.CLIENT_PORT ?? "5173";
+  return process.env.CLIENT_ORIGIN ?? `http://localhost:${clientPort}`;
+}
 
-export const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN ?? `http://localhost:${clientPort}`;
-export const API_BASE = `http://localhost:${apiPort}/api/v1`;
+export function apiBase() {
+  const apiPort = process.env.API_PORT ?? "3001";
+  return `http://localhost:${apiPort}/api/v1`;
+}
 
 export function uniqueEmail(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 10_000)}@example.test`;
@@ -46,20 +50,20 @@ export async function loginViaUi(page: Page, email: string, password: string) {
 }
 
 export async function apiLogin(request: APIRequestContext, email: string, password: string) {
-  const res = await request.post(`${API_BASE}/auth/login`, {
+  const res = await request.post(`${apiBase()}/auth/login`, {
     data: { email, password },
-    headers: { Origin: CLIENT_ORIGIN },
+    headers: { Origin: clientOrigin() },
   });
   return res;
 }
 
 export async function fillMinimalSpecialistProfile(page: Page) {
-  const catalogRes = await page.request.get(`${API_BASE}/catalog`);
+  const catalogRes = await page.request.get(`${apiBase()}/catalog`);
   if (!catalogRes.ok()) {
     throw new Error(`Catalog fetch failed: ${catalogRes.status()}`);
   }
   const catalog = (await catalogRes.json()).data;
-  const res = await page.request.put(`${API_BASE}/specialist/me`, {
+  const res = await page.request.put(`${apiBase()}/specialist/me`, {
     data: {
       cityId: catalog.cities[0].id,
       experienceYears: 5,
@@ -69,7 +73,7 @@ export async function fillMinimalSpecialistProfile(page: Page) {
       injuryTypeIds: [catalog.injuryTypes[0].id],
       formatIds: [catalog.formats[0].id],
     },
-    headers: { Origin: CLIENT_ORIGIN },
+    headers: { Origin: clientOrigin() },
   });
   if (!res.ok()) {
     throw new Error(`Specialist profile update failed: ${res.status()} ${await res.text()}`);

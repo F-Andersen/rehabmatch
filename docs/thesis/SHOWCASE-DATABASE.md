@@ -46,9 +46,9 @@ npm run dev:showcase         # API :3021, client :5184
 ## E2E smoke (опційно)
 
 ```bash
-# Після dev:showcase
-$env:REHABMATCH_SHOWCASE_E2E="1"
-npx playwright test showcase-smoke --project=chromium
+npm run dev:showcase   # окремий термінал
+npm run e2e:showcase   # smoke + acceptance screenshots (read-only, порти 5184/3021)
+npm run showcase:verify-catalog
 ```
 
 Звичайний `npm run e2e` лишається на `rehabmatch_e2e`.
