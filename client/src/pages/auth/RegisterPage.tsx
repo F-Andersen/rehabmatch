@@ -133,7 +133,7 @@ export function RegisterPage() {
 
         <label className="flex items-start gap-2 text-sm text-text-muted">
           <input type="checkbox" className="mt-1" {...register("acceptTerms")} />
-          <span>Я погоджуюсь з умовами використання та політикою конфіденційності (демо MVP).</span>
+          <span>Я погоджуюсь з умовами використання та політикою конфіденційності (навчальний прототип).</span>
         </label>
         {errors.acceptTerms ? (
           <p className="text-sm text-red-600">{errors.acceptTerms.message}</p>
