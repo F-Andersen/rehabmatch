@@ -12,7 +12,7 @@ export const authRouter = Router();
 const authRateLimit = rateLimit({
   windowMs: env.authRateLimitWindowMs,
   max: env.authRateLimitMax,
-  keyPrefix: env.e2eMode ? "auth:e2e" : "auth",
+  keyPrefix: env.e2eMode ? "auth:e2e" : env.showcaseDevMode ? "auth:showcase" : "auth",
 });
 
 authRouter.post("/register", authRateLimit, async (req, res, next) => {

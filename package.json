@@ -11,7 +11,7 @@
     "typecheck": "npm run typecheck -w client && npm run typecheck -w server",
     "test": "npm run test --workspaces --if-present",
     "e2e": "playwright test",
-    "e2e:showcase": "playwright test --config=playwright.showcase.config.ts",
+    "e2e:showcase": "npx dotenv-cli -e .env.showcase -e .env -- playwright test --config=playwright.showcase.config.ts",
     "e2e:prepare": "npm run e2e:db:prepare -w server",
     "showcase:portraits": "npm run showcase:portraits -w server",
     "showcase:prepare": "npm run showcase:db:prepare -w server",

@@ -2,6 +2,8 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { config } from "dotenv";
+import { getDatabaseNameFromUrl } from "./e2e-database-guard.js";
+import { SHOWCASE_DATABASE_NAME } from "./showcase-database-guard.js";
 
 const moduleDir = path.dirname(fileURLToPath(import.meta.url));
 
@@ -49,16 +51,30 @@ const nodeEnv = process.env.NODE_ENV ?? "development";
 const e2eMode =
   process.env.REHABMATCH_E2E === "1" && nodeEnv !== "production";
 
+function isShowcaseDevDatabase(): boolean {
+  const url = process.env.DATABASE_URL;
+  if (!url || nodeEnv === "production") return false;
+  try {
+    return getDatabaseNameFromUrl(url) === SHOWCASE_DATABASE_NAME;
+  } catch {
+    return false;
+  }
+}
+
+const showcaseDevMode = isShowcaseDevDatabase();
+
 export const env = {
   nodeEnv,
   isProduction: nodeEnv === "production",
   /** Playwright / isolated API process: higher auth quota, separate DB via E2E_DATABASE_URL. */
   e2eMode,
+  /** Local thesis demo DB: relaxed auth limits for screenshot / smoke runs (not production). */
+  showcaseDevMode,
   apiPort: readPort("API_PORT", 3001),
   clientOrigin: process.env.CLIENT_ORIGIN ?? "http://localhost:5173",
   sessionSecret: process.env.SESSION_SECRET ?? "dev-only-insecure-session-secret",
   sessionTtlHours: readHours("SESSION_TTL_HOURS", 168),
   sessionCookieName: "rehabmatch_session",
   authRateLimitWindowMs: 15 * 60 * 1000,
-  authRateLimitMax: e2eMode ? 10_000 : 30,
+  authRateLimitMax: e2eMode || showcaseDevMode ? 10_000 : 30,
 };

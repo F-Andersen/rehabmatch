@@ -7,6 +7,7 @@ loadEnv({ path: resolve(root, ".env") });
 loadEnv({ path: resolve(root, ".env.showcase"), override: true });
 
 process.env.REHABMATCH_SHOWCASE_E2E = "1";
+process.env.REHABMATCH_E2E = "1";
 
 const clientPort = process.env.CLIENT_PORT ?? "5184";
 const apiPort = process.env.API_PORT ?? "3021";
@@ -37,6 +38,7 @@ export default defineConfig({
       CLIENT_PORT: clientPort,
       API_PORT: apiPort,
       CLIENT_ORIGIN: clientOrigin,
+      REHABMATCH_E2E: "1",
     },
   },
   projects: [
