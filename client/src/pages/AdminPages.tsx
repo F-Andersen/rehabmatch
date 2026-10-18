@@ -1,13 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { apiRequest, ApiError } from "../lib/api";
 import { useAuth } from "../features/auth/AuthProvider";
 import {
   fetchAdminAppointmentRequests,
+  createAdminCatalogEntry,
   fetchAdminCatalog,
   fetchAdminCriteria,
   fetchAdminReviews,
   fetchAdminUsers,
+  patchAdminCatalogEntry,
   patchAdminCriterion,
   patchAdminReviewStatus,
   patchAdminUserStatus,
@@ -24,8 +27,21 @@ type AdminSummary = {
     specialists: number;
     pendingSpecialists: number;
     pendingReviews: number;
+    appointmentRequests?: {
+      total: number;
+      byStatus: Record<string, number>;
+    };
   };
 };
+
+const adminQuickLinks = [
+  { to: "/admin/users", label: "Користувачі", hint: "Ролі та активність" },
+  { to: "/admin/specialists", label: "Спеціалісти", hint: "Модерація профілів" },
+  { to: "/admin/reviews", label: "Відгуки", hint: "Схвалення / відхилення" },
+  { to: "/admin/requests", label: "Заявки", hint: "Статуси консультацій" },
+  { to: "/admin/dictionaries", label: "Довідники", hint: "Міста, травми, формати" },
+  { to: "/admin/criteria", label: "Критерії", hint: "Описи AHP-критеріїв" },
+];
 
 export function AdminHomePage() {
   const { user } = useAuth();
@@ -34,11 +50,13 @@ export function AdminHomePage() {
     queryFn: () => apiRequest<AdminSummary>("/api/v1/admin/summary"),
   });
 
+  const appointments = summaryQuery.data?.data.appointmentRequests;
+
   return (
     <section className="space-y-6">
-      <div className="rounded-xl border border-border bg-surface p-8 shadow-sm">
-        <h1 className="text-2xl font-semibold text-text">Панель адміністратора</h1>
-        <p className="mt-2 text-text-muted">Вітаємо, {user?.fullName}.</p>
+      <div className="rounded-xl border border-border bg-surface p-6 shadow-sm sm:p-8">
+        <h1 className="text-2xl font-semibold text-text">Огляд системи</h1>
+        <p className="mt-2 text-text-muted">Вітаємо, {user?.fullName}. Дані оновлюються з API адміністратора.</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -55,7 +73,7 @@ export function AdminHomePage() {
           </p>
         </div>
         <div className="rounded-xl border border-border bg-surface p-4 shadow-sm">
-          <p className="text-sm text-text-muted">Очікують модерації</p>
+          <p className="text-sm text-text-muted">Профілі на модерації</p>
           <p className="mt-1 text-2xl font-semibold text-text">
             {summaryQuery.data?.data.pendingSpecialists ?? "…"}
           </p>
@@ -67,6 +85,38 @@ export function AdminHomePage() {
           </p>
         </div>
       </div>
+
+      {appointments && (
+        <div className="rounded-xl border border-border bg-surface p-6 shadow-sm">
+          <h2 className="text-lg font-semibold text-text">Заявки на консультацію</h2>
+          <p className="mt-1 text-sm text-text-muted">Усього: {appointments.total}</p>
+          <ul className="mt-4 flex flex-wrap gap-3 text-sm">
+            {["REQUESTED", "ACCEPTED", "DECLINED", "CANCELLED"].map((status) => (
+              <li key={status} className="rounded-lg bg-surface-tint px-3 py-2">
+                <span className="text-text-muted">{status}:</span>{" "}
+                <span className="font-semibold text-text">{appointments.byStatus[status] ?? 0}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <div>
+        <h2 className="text-lg font-semibold text-text">Швидкі переходи</h2>
+        <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {adminQuickLinks.map((item) => (
+            <li key={item.to}>
+              <Link
+                to={item.to}
+                className="block rounded-xl border border-border bg-surface p-4 shadow-sm transition hover:border-brand-600/40"
+              >
+                <span className="font-medium text-text">{item.label}</span>
+                <p className="mt-1 text-sm text-text-muted">{item.hint}</p>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
     </section>
   );
 }
@@ -75,6 +125,7 @@ export function AdminUsersPage() {
   const queryClient = useQueryClient();
   const [roleFilter, setRoleFilter] = useState<string>("");
   const [activeFilter, setActiveFilter] = useState<string>("");
+  const [search, setSearch] = useState("");
   const [message, setMessage] = useState<string | null>(null);
 
   const listQuery = useQuery({
@@ -100,9 +151,26 @@ export function AdminUsersPage() {
     },
   });
 
+  const filteredUsers = useMemo(() => {
+    const rows = listQuery.data?.data ?? [];
+    const q = search.trim().toLowerCase();
+    if (!q) return rows;
+    return rows.filter(
+      (user) =>
+        user.fullName.toLowerCase().includes(q) || user.email.toLowerCase().includes(q),
+    );
+  }, [listQuery.data?.data, search]);
+
   return (
-    <section className="mx-auto max-w-6xl space-y-6 px-4 py-8">
+    <section className="space-y-6">
       <h1 className="text-2xl font-semibold text-text">Користувачі</h1>
+      <input
+        type="search"
+        placeholder="Пошук за ПІБ або email"
+        className="w-full max-w-md rounded-lg border border-border px-3 py-2 text-sm"
+        value={search}
+        onChange={(event) => setSearch(event.target.value)}
+      />
       <div className="flex flex-wrap gap-2">
         {["", "PATIENT", "SPECIALIST", "ADMIN"].map((role) => (
           <button
@@ -135,7 +203,8 @@ export function AdminUsersPage() {
       {listQuery.isLoading ? (
         <p className="text-text-muted">Завантаження…</p>
       ) : (
-        <table className="w-full overflow-hidden rounded-xl border border-border text-left text-sm">
+        <div className="overflow-x-auto rounded-xl border border-border">
+        <table className="w-full min-w-[640px] text-left text-sm">
           <thead className="bg-surface-tint text-text-muted">
             <tr>
               <th className="px-4 py-3">ПІБ</th>
@@ -146,7 +215,7 @@ export function AdminUsersPage() {
             </tr>
           </thead>
           <tbody>
-            {listQuery.data?.data.map((user) => (
+            {filteredUsers.map((user) => (
               <tr key={user.id} className="border-t border-border">
                 <td className="px-4 py-3">{user.fullName}</td>
                 <td className="px-4 py-3">{user.email}</td>
@@ -169,6 +238,12 @@ export function AdminUsersPage() {
             ))}
           </tbody>
         </table>
+        </div>
+      )}
+      {listQuery.data?.meta && (
+        <p className="text-xs text-text-muted">
+          Сторінка {listQuery.data.meta.page} · показано {filteredUsers.length} з {listQuery.data.meta.total}
+        </p>
       )}
     </section>
   );
@@ -217,11 +292,11 @@ export function AdminSpecialistsPage() {
   const selectedRow = listQuery.data?.data.find((row) => row.id === selectedId);
 
   return (
-    <section className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6">
+    <section className="space-y-6">
       <div className="rounded-xl border border-border bg-surface p-6 shadow-sm">
         <h1 className="text-2xl font-semibold text-text">Модерація спеціалістів</h1>
         <p className="mt-2 text-sm text-text-muted">
-          Перегляд анкет і підтвердження профілів (M3).
+          Перегляд анкет і підтвердження профілів перед публікацією в каталозі.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           {["PENDING", "APPROVED", "REJECTED", ""].map((value) => (
@@ -391,7 +466,7 @@ export function AdminReviewsPage() {
   });
 
   return (
-    <section className="mx-auto max-w-6xl space-y-6 px-4 py-8">
+    <section className="space-y-6">
       <h1 className="text-2xl font-semibold text-text">Модерація відгуків</h1>
       <div className="flex flex-wrap gap-2">
         {["PENDING", "APPROVED", "REJECTED"].map((status) => (
@@ -448,48 +523,161 @@ export function AdminReviewsPage() {
   );
 }
 
+const dictionaryTypes = [
+  { id: "injury-types", label: "Типи травм" },
+  { id: "specializations", label: "Спеціалізації" },
+  { id: "cities", label: "Міста" },
+  { id: "districts", label: "Райони" },
+  { id: "appointment-formats", label: "Формати" },
+] as const;
+
 export function AdminDictionariesPage() {
-  const [type, setType] = useState("injury-types");
+  const queryClient = useQueryClient();
+  const [type, setType] = useState<string>("injury-types");
+  const [newName, setNewName] = useState("");
+  const [newDescription, setNewDescription] = useState("");
+  const [newCityId, setNewCityId] = useState("");
+  const [message, setMessage] = useState<string | null>(null);
+
   const listQuery = useQuery({
     queryKey: ["admin", "catalog", type],
     queryFn: () => fetchAdminCatalog(type),
   });
 
-  const types = [
-    "injury-types",
-    "specializations",
-    "cities",
-    "districts",
-    "appointment-formats",
-  ];
+  const citiesQuery = useQuery({
+    queryKey: ["admin", "catalog", "cities"],
+    queryFn: () => fetchAdminCatalog("cities"),
+    enabled: type === "districts",
+  });
+
+  const createMutation = useMutation({
+    mutationFn: () =>
+      createAdminCatalogEntry(type, {
+        name: newName.trim(),
+        description: newDescription.trim() || undefined,
+        cityId: type === "districts" ? newCityId : undefined,
+      }),
+    onSuccess: async () => {
+      setMessage("Запис додано.");
+      setNewName("");
+      setNewDescription("");
+      await queryClient.invalidateQueries({ queryKey: ["admin", "catalog", type] });
+    },
+    onError: (error) => {
+      setMessage(error instanceof ApiError ? error.message : "Не вдалося створити запис.");
+    },
+  });
+
+  const patchMutation = useMutation({
+    mutationFn: ({ id, name }: { id: string; name: string }) =>
+      patchAdminCatalogEntry(type, id, { name }),
+    onSuccess: async () => {
+      setMessage("Запис оновлено.");
+      await queryClient.invalidateQueries({ queryKey: ["admin", "catalog", type] });
+    },
+    onError: (error) => {
+      setMessage(error instanceof ApiError ? error.message : "Не вдалося оновити запис.");
+    },
+  });
 
   return (
-    <section className="mx-auto max-w-4xl space-y-6 px-4 py-8">
+    <section className="space-y-6">
       <h1 className="text-2xl font-semibold text-text">Довідники</h1>
-      <p className="text-sm text-text-muted">Перегляд довідникових значень MVP (без небезпечного видалення).</p>
+      <p className="text-sm text-text-muted">Перегляд, створення та редагування назв через admin API.</p>
       <div className="flex flex-wrap gap-2">
-        {types.map((value) => (
+        {dictionaryTypes.map((item) => (
           <button
-            key={value}
+            key={item.id}
             type="button"
             className={[
               "rounded-lg px-3 py-1.5 text-sm",
-              type === value ? "bg-brand-600 text-white" : "border border-border",
+              type === item.id ? "bg-brand-600 text-white" : "border border-border",
             ].join(" ")}
-            onClick={() => setType(value)}
+            onClick={() => setType(item.id)}
           >
-            {value}
+            {item.label}
           </button>
         ))}
       </div>
+
+      <form
+        className="rounded-xl border border-border bg-surface p-4 shadow-sm"
+        onSubmit={(event) => {
+          event.preventDefault();
+          if (newName.trim().length < 2) return;
+          if (type === "districts" && !newCityId) {
+            setMessage("Оберіть місто для району.");
+            return;
+          }
+          createMutation.mutate();
+        }}
+      >
+        <h2 className="text-sm font-semibold text-text">Додати запис</h2>
+        <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+          <input
+            className="flex-1 rounded-lg border border-border px-3 py-2 text-sm"
+            placeholder="Назва"
+            value={newName}
+            onChange={(event) => setNewName(event.target.value)}
+            required
+            minLength={2}
+          />
+          {(type === "injury-types" || type === "specializations") && (
+            <input
+              className="flex-1 rounded-lg border border-border px-3 py-2 text-sm"
+              placeholder="Опис (необовʼязково)"
+              value={newDescription}
+              onChange={(event) => setNewDescription(event.target.value)}
+            />
+          )}
+          {type === "districts" && (
+            <select
+              className="rounded-lg border border-border px-3 py-2 text-sm"
+              value={newCityId}
+              onChange={(event) => setNewCityId(event.target.value)}
+              required
+            >
+              <option value="">Місто</option>
+              {citiesQuery.data?.map((city) => (
+                <option key={city.id} value={city.id}>{city.name}</option>
+              ))}
+            </select>
+          )}
+          <button
+            type="submit"
+            disabled={createMutation.isPending}
+            className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+          >
+            Додати
+          </button>
+        </div>
+      </form>
+
+      {message && <p className="text-sm text-text-muted">{message}</p>}
+
       {listQuery.isLoading ? (
         <p className="text-text-muted">Завантаження…</p>
       ) : (
         <ul className="divide-y divide-border rounded-xl border border-border">
           {listQuery.data?.map((row) => (
-            <li key={row.id} className="px-4 py-3 text-sm">
-              <span className="font-medium">{row.name}</span>
-              {row.description && <span className="text-text-muted"> — {row.description}</span>}
+            <li key={row.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm">
+              <div>
+                <span className="font-medium">{row.name}</span>
+                {row.description && <span className="text-text-muted"> — {row.description}</span>}
+                {row.city && <span className="text-text-muted"> ({row.city.name})</span>}
+              </div>
+              <button
+                type="button"
+                className="text-brand-600 hover:text-brand-700"
+                onClick={() => {
+                  const next = window.prompt("Нова назва", row.name);
+                  if (next && next.trim() !== row.name) {
+                    patchMutation.mutate({ id: row.id, name: next.trim() });
+                  }
+                }}
+              >
+                Редагувати назву
+              </button>
             </li>
           ))}
         </ul>
@@ -519,7 +707,7 @@ export function AdminCriteriaPage() {
   });
 
   return (
-    <section className="mx-auto max-w-3xl space-y-6 px-4 py-8">
+    <section className="space-y-6">
       <h1 className="text-2xl font-semibold text-text">Критерії підбору</h1>
       <p className="text-sm text-text-muted">
         П’ять ключів алгоритму AHP не змінюються; доступне лише оновлення опису.
@@ -567,7 +755,7 @@ export function AdminRequestsPage() {
   });
 
   return (
-    <section className="mx-auto max-w-6xl space-y-6 px-4 py-8">
+    <section className="space-y-6">
       <h1 className="text-2xl font-semibold text-text">Заявки на консультацію</h1>
       <div className="flex flex-wrap gap-2">
         {["", "REQUESTED", "ACCEPTED", "DECLINED", "CANCELLED"].map((status) => (

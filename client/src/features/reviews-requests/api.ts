@@ -171,10 +171,39 @@ export async function fetchAdminAppointmentRequests(params: Record<string, strin
   );
 }
 
+export type CatalogAdminRow = {
+  id: string;
+  name: string;
+  description?: string | null;
+  cityId?: string;
+  city?: { id: string; name: string };
+};
+
 export async function fetchAdminCatalog(type: string) {
-  const res = await apiRequest<{ data: { id: string; name: string; description?: string | null }[] }>(
-    `/api/v1/admin/catalog/${type}`,
-  );
+  const res = await apiRequest<{ data: CatalogAdminRow[] }>(`/api/v1/admin/catalog/${type}`);
+  return res.data;
+}
+
+export async function createAdminCatalogEntry(
+  type: string,
+  payload: { name: string; description?: string; cityId?: string },
+) {
+  const res = await apiRequest<{ data: CatalogAdminRow }>(`/api/v1/admin/catalog/${type}`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+  return res.data;
+}
+
+export async function patchAdminCatalogEntry(
+  type: string,
+  id: string,
+  payload: { name?: string; description?: string },
+) {
+  const res = await apiRequest<{ data: CatalogAdminRow }>(`/api/v1/admin/catalog/${type}/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
   return res.data;
 }
 

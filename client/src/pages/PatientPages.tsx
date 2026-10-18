@@ -7,7 +7,6 @@ import {
   cancelPatientAppointmentRequest,
   fetchPatientAppointmentRequests,
 } from "../features/reviews-requests/api";
-import { PlaceholderPage } from "../components/PlaceholderPage";
 import { ApiError } from "../lib/api";
 
 export {
@@ -185,5 +184,29 @@ export function MyRequestsPage() {
 }
 
 export function SettingsPage() {
-  return <PlaceholderPage title="Налаштування" description="Налаштування профілю — майбутній етап." />;
+  const { user } = useAuth();
+  return (
+    <div className="mx-auto max-w-lg space-y-4 rounded-xl border border-border bg-surface p-6 shadow-sm">
+      <h1 className="text-2xl font-semibold text-text">Налаштування облікового запису</h1>
+      <p className="text-sm text-text-muted">
+        Базові дані сесії. Розширене редагування профілю доступне в кабінеті пацієнта або спеціаліста.
+      </p>
+      {user && (
+        <dl className="space-y-2 text-sm">
+          <div>
+            <dt className="text-text-muted">ПІБ</dt>
+            <dd className="font-medium text-text">{user.fullName}</dd>
+          </div>
+          <div>
+            <dt className="text-text-muted">Email</dt>
+            <dd className="font-medium text-text">{user.email}</dd>
+          </div>
+          <div>
+            <dt className="text-text-muted">Роль</dt>
+            <dd className="font-medium text-text">{user.role}</dd>
+          </div>
+        </dl>
+      )}
+    </div>
+  );
 }

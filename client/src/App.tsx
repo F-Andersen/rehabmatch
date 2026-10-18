@@ -1,4 +1,5 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { AdminLayout } from "./components/AdminLayout";
 import { AppLayout } from "./components/AppLayout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import {
@@ -139,58 +140,18 @@ export default function App() {
             path="admin"
             element={
               <ProtectedRoute roles={["ADMIN"]}>
-                <AdminHomePage />
+                <AdminLayout />
               </ProtectedRoute>
             }
-          />
-          <Route
-            path="admin/users"
-            element={
-              <ProtectedRoute roles={["ADMIN"]}>
-                <AdminUsersPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="admin/specialists"
-            element={
-              <ProtectedRoute roles={["ADMIN"]}>
-                <AdminSpecialistsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="admin/reviews"
-            element={
-              <ProtectedRoute roles={["ADMIN"]}>
-                <AdminReviewsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="admin/dictionaries"
-            element={
-              <ProtectedRoute roles={["ADMIN"]}>
-                <AdminDictionariesPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="admin/criteria"
-            element={
-              <ProtectedRoute roles={["ADMIN"]}>
-                <AdminCriteriaPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="admin/requests"
-            element={
-              <ProtectedRoute roles={["ADMIN"]}>
-                <AdminRequestsPage />
-              </ProtectedRoute>
-            }
-          />
+          >
+            <Route index element={<AdminHomePage />} />
+            <Route path="users" element={<AdminUsersPage />} />
+            <Route path="specialists" element={<AdminSpecialistsPage />} />
+            <Route path="reviews" element={<AdminReviewsPage />} />
+            <Route path="dictionaries" element={<AdminDictionariesPage />} />
+            <Route path="criteria" element={<AdminCriteriaPage />} />
+            <Route path="requests" element={<AdminRequestsPage />} />
+          </Route>
         </Route>
       </Routes>
     </BrowserRouter>

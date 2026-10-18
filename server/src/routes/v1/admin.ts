@@ -47,12 +47,24 @@ adminRouter.use(requireAuth, requireRole(UserRole.ADMIN));
 
 adminRouter.get("/summary", async (_req, res, next) => {
   try {
-    const [users, specialists, pendingSpecialists, pendingReviews] = await Promise.all([
-      prisma.user.count(),
-      prisma.specialist.count(),
-      prisma.specialist.count({ where: { verificationStatus: "PENDING" } }),
-      prisma.review.count({ where: { status: "PENDING" } }),
-    ]);
+    const [users, specialists, pendingSpecialists, pendingReviews, appointmentGroups] =
+      await Promise.all([
+        prisma.user.count(),
+        prisma.specialist.count(),
+        prisma.specialist.count({ where: { verificationStatus: "PENDING" } }),
+        prisma.review.count({ where: { status: "PENDING" } }),
+        prisma.appointmentRequest.groupBy({
+          by: ["status"],
+          _count: { _all: true },
+        }),
+      ]);
+
+    const appointmentRequests = {
+      total: appointmentGroups.reduce((sum, row) => sum + row._count._all, 0),
+      byStatus: Object.fromEntries(
+        appointmentGroups.map((row) => [row.status, row._count._all]),
+      ) as Record<string, number>,
+    };
 
     res.json({
       data: {
@@ -60,6 +72,7 @@ adminRouter.get("/summary", async (_req, res, next) => {
         specialists,
         pendingSpecialists,
         pendingReviews,
+        appointmentRequests,
       },
     });
   } catch (error) {
