@@ -16,7 +16,7 @@
     "showcase:prepare": "npm run showcase:db:prepare -w server",
     "showcase:seed": "npm run showcase:seed -w server",
     "showcase:verify": "npm run showcase:verify -w server",
-    "dev:showcase": "npx dotenv-cli -e .env -e .env.showcase -- concurrently -n client,server -c blue,green \"npm run dev -w client\" \"npm run dev -w server\"",
+    "dev:showcase": "npx dotenv-cli -e .env.showcase -e .env -- concurrently -n client,server -c blue,green \"npm run dev -w client\" \"npm run dev -w server\"",
     "e2e:visual": "playwright test visual-qa",
     "bench:recommendation": "npm run bench:recommendation -w server",
     "openapi:lint": "npx --yes @redocly/cli@1 lint docs/api/openapi.yaml",

@@ -8,13 +8,14 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, repoRoot, "");
-  const apiPort = env.API_PORT || "3001";
+  const apiPort = process.env.API_PORT || env.API_PORT || "3001";
+  const clientPort = Number(process.env.CLIENT_PORT || env.CLIENT_PORT || 5173);
 
   return {
     envDir: repoRoot,
     plugins: [react(), tailwindcss()],
     server: {
-      port: Number(env.CLIENT_PORT || 5173),
+      port: clientPort,
       proxy: {
         "/api": {
           target: `http://localhost:${apiPort}`,
