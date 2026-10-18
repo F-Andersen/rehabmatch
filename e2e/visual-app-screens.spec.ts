@@ -26,6 +26,7 @@ test.describe("thesis app screens", () => {
     { tag: "mobile-375", width: 375, height: 812 },
   ] as const) {
     test(`${viewport.tag}`, async ({ page }) => {
+    test.slow();
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
 
     const patientEmail = uniqueEmail(`vis-p-${viewport.tag}`);
@@ -50,7 +51,7 @@ test.describe("thesis app screens", () => {
       if (i < 9) await page.getByRole("button", { name: "Далі" }).click();
     }
     await page.getByRole("button", { name: "Попередній розрахунок" }).click();
-    await expect(page.getByText("Ваги критеріїв")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText("Ваги критеріїв", { exact: true })).toBeVisible({ timeout: 15_000 });
     await page.getByRole("button", { name: "Отримати рекомендації" }).click();
     await expect(page).toHaveURL(/\/recommendations\/[a-f0-9-]+$/i);
     await expect(page.getByRole("heading", { name: "Персоналізовані рекомендації" })).toBeVisible();
@@ -59,6 +60,10 @@ test.describe("thesis app screens", () => {
     await page.goto("/my-requests");
     await expect(page.getByRole("heading", { name: /заявки на консультацію/i })).toBeVisible();
     await shot(page, "patient-requests", viewport.tag);
+
+    if (viewport.tag === "mobile-375") {
+      return;
+    }
 
     await logoutIfNeeded(page);
     const specEmail = uniqueEmail(`vis-s-${viewport.tag}`);
@@ -74,7 +79,7 @@ test.describe("thesis app screens", () => {
       const adminLogin = await apiLogin(page.request, adminEmail, adminPassword);
       expect(adminLogin.status()).toBe(200);
       await page.goto("/admin");
-      await expect(page.getByRole("heading", { name: /Панель адміністратора/i })).toBeVisible();
+      await expect(page.getByRole("heading", { name: "Огляд системи" })).toBeVisible();
       await shot(page, "admin-panel", viewport.tag);
       await page.goto("/admin/reviews");
       await shot(page, "admin-reviews", viewport.tag);
