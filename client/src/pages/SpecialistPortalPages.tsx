@@ -10,6 +10,7 @@ import {
   fetchOwnSpecialistProfile,
   replaceOwnSpecialistServices,
   updateOwnSpecialistProfile,
+  uploadOwnSpecialistPhoto,
 } from "../features/specialists/api";
 import { ApiError } from "../lib/api";
 import {
@@ -121,6 +122,18 @@ export function SpecialistDashboardPage() {
     });
   }, [profileQuery.data, user, reset]);
 
+  const photoMutation = useMutation({
+    mutationFn: (file: File) => uploadOwnSpecialistPhoto(file),
+    onSuccess: async () => {
+      setFormSuccess("Фото профілю оновлено. Профіль може потребувати повторної модерації.");
+      await queryClient.invalidateQueries({ queryKey: ["specialist", "me"] });
+    },
+    onError: (error) => {
+      setFormSuccess(null);
+      setFormError(error instanceof ApiError ? error.message : "Не вдалося завантажити фото.");
+    },
+  });
+
   const saveMutation = useMutation({
     mutationFn: async (values: ProfileFormValues) => {
       await updateOwnSpecialistProfile({
@@ -194,6 +207,34 @@ export function SpecialistDashboardPage() {
           noValidate
         >
           <h2 className="text-lg font-semibold text-text">Редагування анкети</h2>
+
+          <div className="flex flex-wrap items-center gap-4 rounded-lg border border-border bg-surface-tint/50 p-4">
+            {profileQuery.data?.photoUrl ? (
+              <img
+                src={profileQuery.data.photoUrl}
+                alt="Поточне фото профілю"
+                className="h-20 w-20 rounded-full object-cover ring-2 ring-white"
+              />
+            ) : (
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-surface text-sm text-text-muted">
+                Немає фото
+              </div>
+            )}
+            <div className="min-w-0 flex-1 text-sm">
+              <p className="font-medium text-text">Фото профілю</p>
+              <p className="text-text-muted">JPEG, PNG або WebP, до 2 МБ. Після зміни можлива повторна модерація.</p>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="mt-2 max-w-xs text-xs"
+                onChange={(event) => {
+                  const file = event.target.files?.[0];
+                  if (file) photoMutation.mutate(file);
+                  event.target.value = "";
+                }}
+              />
+            </div>
+          </div>
 
           {formError && (
             <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">

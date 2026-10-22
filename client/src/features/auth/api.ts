@@ -30,3 +30,14 @@ export async function registerRequest(payload: {
 export async function logoutRequest(): Promise<void> {
   await apiRequest<void>("/api/v1/auth/logout", { method: "POST" });
 }
+
+export async function updateMeRequest(payload: {
+  fullName?: string;
+  phone?: string | null;
+}): Promise<PublicUser> {
+  const response = await apiRequest<AuthResponse>("/api/v1/me", {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+  return response.data;
+}

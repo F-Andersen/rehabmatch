@@ -18,6 +18,7 @@
     "showcase:seed": "tsx prisma/seed-showcase.ts",
     "showcase:verify": "dotenv -e ../.env.showcase -- tsx scripts/verify-showcase-seed.ts",
     "showcase:verify-catalog": "dotenv -e ../.env.showcase -- tsx scripts/verify-showcase-catalog-api.ts",
+    "showcase:patch-copy": "dotenv -e ../.env.showcase -- tsx scripts/patch-showcase-injury-descriptions.ts",
     "showcase:db:migrate": "dotenv -e ../.env.showcase -- prisma migrate deploy",
     "e2e:db:migrate": "dotenv -e ../.env.e2e -- prisma migrate deploy",
     "db:validate": "dotenv -e ../.env -- prisma validate",

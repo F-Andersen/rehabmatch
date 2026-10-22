@@ -11,6 +11,21 @@ export function AboutPage() {
         </p>
       </header>
 
+      <div className="grid gap-4 sm:grid-cols-2">
+        <img
+          src="/images/marketing/rehab-center.jpg"
+          alt="Сучасний зал фізичної реабілітації з обладнанням"
+          className="h-48 w-full rounded-xl object-cover shadow-sm sm:h-56"
+          loading="lazy"
+        />
+        <img
+          src="/images/marketing/manual-therapy.png"
+          alt="Мануальна терапія та супровід спеціаліста"
+          className="h-48 w-full rounded-xl object-cover shadow-sm sm:h-56"
+          loading="lazy"
+        />
+      </div>
+
       <section className="space-y-3 text-sm leading-relaxed text-text-muted">
         <h2 className="text-xl font-semibold text-text">Що це таке</h2>
         <p>

@@ -4,6 +4,7 @@ export type PublicUser = {
   id: string;
   fullName: string;
   email: string;
+  phone: string | null;
   role: UserRole;
   patientId: string | null;
   specialistId: string | null;

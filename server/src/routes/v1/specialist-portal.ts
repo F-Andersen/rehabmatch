@@ -18,6 +18,8 @@ import {
   replaceOwnServices,
   updateOwnSpecialistProfile,
 } from "../../modules/specialists/specialist.profile.service.js";
+import { saveSpecialistPhotoFromBase64 } from "../../lib/specialist-photo-upload.js";
+import { z } from "zod";
 
 export const specialistPortalRouter = Router();
 
@@ -26,6 +28,27 @@ specialistPortalRouter.use(requireAuth, requireRole(UserRole.SPECIALIST));
 specialistPortalRouter.get("/me", async (req, res, next) => {
   try {
     const data = await getOwnSpecialistProfile(req.user!.id);
+    res.json({ data });
+  } catch (error) {
+    next(error);
+  }
+});
+
+const uploadPhotoSchema = z.object({
+  mimeType: z.enum(["image/jpeg", "image/png", "image/webp"]),
+  dataBase64: z.string().min(32).max(3_000_000),
+});
+
+specialistPortalRouter.post("/me/photo", async (req, res, next) => {
+  try {
+    const input = uploadPhotoSchema.parse(req.body);
+    const profile = await getOwnSpecialistProfile(req.user!.id);
+    const photoUrl = await saveSpecialistPhotoFromBase64(
+      profile.id,
+      input.mimeType,
+      input.dataBase64,
+    );
+    const data = await updateOwnSpecialistProfile(req.user!.id, { photoUrl });
     res.json({ data });
   } catch (error) {
     next(error);

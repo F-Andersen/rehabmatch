@@ -79,6 +79,36 @@ export async function getOwnReviewForSpecialist(patientId: string, specialistId:
     : null;
 }
 
+export async function listReviewsForPatient(patientId: string, page: number, pageSize: number) {
+  const skip = (page - 1) * pageSize;
+  const where = { patientId };
+  const [total, items] = await Promise.all([
+    prisma.review.count({ where }),
+    prisma.review.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: pageSize,
+      include: {
+        specialist: { include: { user: { select: { fullName: true } } } },
+      },
+    }),
+  ]);
+
+  return {
+    data: items.map((item) => ({
+      id: item.id,
+      rating: item.rating,
+      comment: item.comment,
+      status: item.status,
+      createdAt: item.createdAt,
+      specialistId: item.specialistId,
+      specialistName: item.specialist.user.fullName,
+    })),
+    meta: buildPaginationMeta(page, pageSize, total),
+  };
+}
+
 export async function listReviewsForAdmin(query: AdminQuery) {
   const where = query.status ? { status: query.status } : {};
   const skip = (query.page - 1) * query.pageSize;

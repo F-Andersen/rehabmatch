@@ -27,7 +27,10 @@ export const updateSpecialistProfileSchema = z.object({
   cityId: z.string().uuid().nullable().optional(),
   districtId: z.string().uuid().nullable().optional(),
   inclusiveSpace: z.boolean().optional(),
-  photoUrl: z.string().url().max(500).nullable().optional(),
+  photoUrl: z
+    .union([z.string().url().max(500), z.string().regex(/^\/images\/[\w./-]+$/)])
+    .nullable()
+    .optional(),
   specializationIds: z.array(z.string().uuid()).min(1).max(5).optional(),
   injuryTypeIds: z.array(z.string().uuid()).min(1).max(10).optional(),
   formatIds: z.array(z.string().uuid()).min(1).max(3).optional(),

@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { AdminLayout } from "./components/AdminLayout";
 import { AppLayout } from "./components/AppLayout";
+import { PatientLayout } from "./components/PatientLayout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import {
   AdminCriteriaPage,
@@ -19,7 +20,9 @@ import {
   MatchingNewPage,
   MatchingResultsPage,
   MyRequestsPage,
+  MyReviewsPage,
   PatientDashboardPage,
+  PatientProfilePage,
   RecommendationDetailPage,
   RecommendationsHistoryPage,
   SettingsPage,
@@ -47,13 +50,19 @@ export default function App() {
           <Route path="contacts" element={<ContactsPage />} />
 
           <Route
-            path="dashboard"
             element={
               <ProtectedRoute roles={["PATIENT"]}>
-                <PatientDashboardPage />
+                <PatientLayout />
               </ProtectedRoute>
             }
-          />
+          >
+            <Route path="dashboard" element={<PatientDashboardPage />} />
+            <Route path="profile" element={<PatientProfilePage />} />
+            <Route path="recommendations" element={<RecommendationsHistoryPage />} />
+            <Route path="my-requests" element={<MyRequestsPage />} />
+            <Route path="my-reviews" element={<MyReviewsPage />} />
+            <Route path="settings" element={<SettingsPage />} />
+          </Route>
           <Route
             path="matching/new"
             element={
@@ -79,14 +88,6 @@ export default function App() {
             }
           />
           <Route
-            path="recommendations"
-            element={
-              <ProtectedRoute roles={["PATIENT"]}>
-                <RecommendationsHistoryPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
             path="recommendations/:id"
             element={
               <ProtectedRoute roles={["PATIENT"]}>
@@ -95,17 +96,9 @@ export default function App() {
             }
           />
           <Route
-            path="my-requests"
-            element={
-              <ProtectedRoute roles={["PATIENT"]}>
-                <MyRequestsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
             path="settings"
             element={
-              <ProtectedRoute roles={["PATIENT", "SPECIALIST", "ADMIN"]}>
+              <ProtectedRoute roles={["SPECIALIST", "ADMIN"]}>
                 <SettingsPage />
               </ProtectedRoute>
             }

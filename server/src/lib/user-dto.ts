@@ -4,6 +4,7 @@ export type PublicUserDto = {
   id: string;
   fullName: string;
   email: string;
+  phone: string | null;
   role: string;
   patientId: string | null;
   specialistId: string | null;
@@ -15,6 +16,7 @@ export function toPublicUserDto(user: SessionUser): PublicUserDto {
     id: user.id,
     fullName: user.fullName,
     email: user.email,
+    phone: user.phone ?? null,
     role: user.role,
     patientId: user.patient?.id ?? null,
     specialistId: user.specialist?.id ?? null,

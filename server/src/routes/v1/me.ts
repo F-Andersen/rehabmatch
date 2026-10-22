@@ -10,8 +10,15 @@ import {
   cancelPatientAppointmentRequest,
   listPatientAppointmentRequests,
 } from "../../modules/appointments/appointment.service.js";
+import { listReviewsForPatient } from "../../modules/reviews/review.service.js";
+import { z } from "zod";
 
 export const meRouter = Router();
+
+const patientReviewsQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(50).default(20),
+});
 
 meRouter.patch("/", requireAuth, async (req, res, next) => {
   try {
@@ -22,6 +29,24 @@ meRouter.patch("/", requireAuth, async (req, res, next) => {
     next(error);
   }
 });
+
+meRouter.get(
+  "/reviews",
+  requireAuth,
+  requireRole(UserRole.PATIENT),
+  async (req, res, next) => {
+    try {
+      if (!req.user?.patient) {
+        throw new AppError(404, "NOT_FOUND", "Профіль пацієнта не знайдено");
+      }
+      const query = patientReviewsQuerySchema.parse(req.query);
+      const result = await listReviewsForPatient(req.user.patient.id, query.page, query.pageSize);
+      res.json(result);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
 
 meRouter.get(
   "/appointment-requests",

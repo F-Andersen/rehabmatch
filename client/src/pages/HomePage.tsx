@@ -36,8 +36,9 @@ export function HomePage() {
 
   return (
     <div className="space-y-16 pb-4">
-      <section className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-surface via-surface to-surface-tint px-6 py-12 shadow-sm sm:px-10 sm:py-16">
-        <div className="relative z-10 max-w-2xl">
+      <section className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-surface via-surface to-surface-tint shadow-sm">
+        <div className="grid lg:grid-cols-2 lg:items-stretch">
+        <div className="relative z-10 px-6 py-12 sm:px-10 sm:py-16 lg:max-w-xl">
           <p className="text-sm font-semibold uppercase tracking-wide text-brand-600">RehabMatch</p>
           <h1 className="mt-3 text-3xl font-bold leading-tight text-text sm:text-4xl lg:text-[2.5rem]">
             Знайдіть спеціаліста з реабілітації відповідно до ваших потреб
@@ -67,6 +68,16 @@ export function HomePage() {
               спеціалістів (дані з вашої бази).
             </p>
           )}
+        </div>
+        <div className="relative min-h-[220px] lg:min-h-full">
+          <img
+            src="/images/marketing/hero-gait-training.png"
+            alt="Спеціаліст супроводжує пацієнта під час відновлення ходи в реабілітаційному залі"
+            className="absolute inset-0 h-full w-full object-cover"
+            loading="eager"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-bg-page/80 via-transparent to-transparent lg:bg-gradient-to-l lg:from-surface lg:via-surface/40 lg:to-transparent" />
+        </div>
         </div>
       </section>
 

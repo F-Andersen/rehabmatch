@@ -71,6 +71,28 @@ export async function updateOwnSpecialistProfile(payload: UpdateSpecialistPayloa
 
 export type ServiceInput = { name: string; description?: string; price: number };
 
+export async function uploadOwnSpecialistPhoto(file: File) {
+  const buffer = await file.arrayBuffer();
+  const bytes = new Uint8Array(buffer);
+  let binary = "";
+  for (let i = 0; i < bytes.length; i += 1) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  const dataBase64 = btoa(binary);
+  const mimeType = file.type;
+  if (!["image/jpeg", "image/png", "image/webp"].includes(mimeType)) {
+    throw new Error("Дозволені формати: JPEG, PNG, WebP");
+  }
+  if (file.size > 2 * 1024 * 1024) {
+    throw new Error("Максимальний розмір файлу — 2 МБ");
+  }
+  const res = await apiRequest<{ data: SpecialistProfile }>("/api/v1/specialist/me/photo", {
+    method: "POST",
+    body: JSON.stringify({ mimeType, dataBase64 }),
+  });
+  return res.data;
+}
+
 export async function replaceOwnSpecialistServices(services: ServiceInput[]) {
   const res = await apiRequest<{ data: SpecialistProfile }>("/api/v1/specialist/me/services", {
     method: "PUT",

@@ -18,6 +18,22 @@ export type AppointmentRequestItem = {
   specialistName?: string;
 };
 
+export type PatientReviewListItem = {
+  id: string;
+  rating: number;
+  comment: string;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  createdAt: string;
+  specialistId: string;
+  specialistName: string;
+};
+
+export async function fetchPatientReviews(page = "1", pageSize = "20") {
+  return apiRequest<{ data: PatientReviewListItem[]; meta: PaginationMeta }>(
+    `/api/v1/me/reviews?page=${page}&pageSize=${pageSize}`,
+  );
+}
+
 export async function fetchMyReviewForSpecialist(specialistId: string) {
   const res = await apiRequest<{ data: OwnReview | null }>(
     `/api/v1/specialists/${specialistId}/reviews/mine`,
