@@ -162,6 +162,21 @@ export function HowItWorksPage() {
         </p>
       </header>
 
+      <div className="grid gap-4 lg:grid-cols-2">
+        <img
+          src="/images/marketing/resistance-therapy.jpg"
+          alt="Вправи з еластичною стрічкою під наглядом реабілітолога"
+          className="h-56 w-full rounded-2xl object-cover shadow-sm"
+          loading="lazy"
+        />
+        <img
+          src="/images/marketing/manual-therapy.png"
+          alt="Мануальна робота з пацієнтом у кабінеті реабілітації"
+          className="h-56 w-full rounded-2xl object-cover shadow-sm"
+          loading="lazy"
+        />
+      </div>
+
       <ol className="grid gap-4 md:grid-cols-2">
         {workflowSteps.map((step, index) => (
           <li key={step.title} className="flex gap-4 rounded-xl border border-border bg-surface p-5 shadow-sm">

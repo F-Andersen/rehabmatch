@@ -60,7 +60,12 @@ export default defineConfig({
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
-      testIgnore: [/visual-qa\.spec\.ts/, /showcase-smoke\.spec\.ts/, /showcase-acceptance-screens\.spec\.ts/],
+      testIgnore: [
+        /visual-qa\.spec\.ts/,
+        /showcase-smoke\.spec\.ts/,
+        /showcase-acceptance-screens\.spec\.ts/,
+        /final-product-screens\.spec\.ts/,
+      ],
     },
     {
       name: "mobile-375",

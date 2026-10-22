@@ -104,6 +104,26 @@ export function PatientDashboardPage() {
         </div>
       </div>
 
+      {requests.data && requests.data.data.length > 0 && (
+        <div className="rounded-xl border border-border bg-surface p-6 shadow-sm">
+          <h2 className="text-lg font-semibold">Активні заявки</h2>
+          <ul className="mt-3 space-y-2 text-sm">
+            {requests.data.data
+              .filter((r) => r.status === "REQUESTED")
+              .slice(0, 3)
+              .map((r) => (
+                <li key={r.id} className="flex justify-between gap-2 border-b border-border pb-2 last:border-0">
+                  <span>{r.specialistName ?? "Спеціаліст"}</span>
+                  <span className="text-text-muted">{requestStatusLabel(r.status)}</span>
+                </li>
+              ))}
+          </ul>
+          {openRequests === 0 && (
+            <p className="mt-2 text-sm text-text-muted">Немає заявок, що очікують відповіді.</p>
+          )}
+        </div>
+      )}
+
       <div className="rounded-xl border border-border bg-surface p-6 shadow-sm">
         <h2 className="text-lg font-semibold">Останні підбори</h2>
         {history.isLoading ? (

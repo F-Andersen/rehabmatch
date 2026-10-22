@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
+import { FaqAccordion, homeFaqItems } from "../components/FaqAccordion";
 import { useAuth } from "../features/auth/AuthProvider";
 import { fetchCatalogDictionaries, fetchSpecialistsList } from "../features/specialists/api";
 
@@ -236,6 +237,14 @@ export function HomePage() {
             ))}
           </ul>
         )}
+      </section>
+
+      <section aria-labelledby="faq-heading" className="max-w-3xl">
+        <h2 id="faq-heading" className="text-2xl font-semibold text-text">Часті запитання</h2>
+        <p className="mt-2 text-sm text-text-muted">Відповіді відповідають фактичній логіці RehabMatch.</p>
+        <div className="mt-6">
+          <FaqAccordion items={homeFaqItems} />
+        </div>
       </section>
 
       <section className="rounded-2xl border border-dashed border-brand-600/30 bg-surface-tint/50 px-6 py-10 text-center sm:px-10">

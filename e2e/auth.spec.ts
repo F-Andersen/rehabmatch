@@ -13,5 +13,5 @@ test("patient can register and reach dashboard", async ({ page }) => {
   await page.getByRole("button", { name: "Зареєструватися" }).click();
 
   await expect(page).toHaveURL(/\/dashboard$/);
-  await expect(page.getByRole("heading", { name: "Кабінет пацієнта" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Огляд" })).toBeVisible();
 });

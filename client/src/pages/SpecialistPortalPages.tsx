@@ -57,6 +57,84 @@ function statusMessage(status: string | null | undefined) {
 }
 
 export function SpecialistDashboardPage() {
+  const { user } = useAuth();
+  const profileQuery = useQuery({
+    queryKey: ["specialist", "me"],
+    queryFn: fetchOwnSpecialistProfile,
+  });
+  const requestsQuery = useQuery({
+    queryKey: ["specialist", "appointment-requests", "overview"],
+    queryFn: () => fetchSpecialistAppointmentRequests({ page: "1", pageSize: "20" }),
+  });
+
+  const verificationStatus = profileQuery.data?.verificationStatus ?? user?.specialistVerificationStatus;
+  const pending =
+    requestsQuery.data?.data.filter((r) => r.status === "REQUESTED").length ?? 0;
+  const serviceCount = profileQuery.data?.services.length ?? 0;
+
+  return (
+    <section className="space-y-6">
+      <div className="rounded-xl border border-border bg-surface p-6 shadow-sm">
+        <h1 className="text-2xl font-semibold text-text">Огляд</h1>
+        <p className="mt-2 text-text-muted">Вітаємо, {user?.fullName}.</p>
+        <p className="mt-3 rounded-lg bg-surface-tint px-4 py-3 text-sm">
+          Статус модерації: <strong>{verificationStatus ?? "—"}</strong>
+          <br />
+          <span className="text-text-muted">{statusMessage(verificationStatus)}</span>
+        </p>
+        {profileQuery.data?.verificationStatus === "APPROVED" && (
+          <Link
+            to={`/specialists/${profileQuery.data.id}`}
+            className="mt-3 inline-block text-sm font-medium text-brand-600 hover:text-brand-700"
+          >
+            Публічний профіль у каталозі →
+          </Link>
+        )}
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-3">
+        <div className="rounded-xl border border-border bg-surface p-4 shadow-sm">
+          <p className="text-sm text-text-muted">Нові заявки</p>
+          <p className="mt-1 text-2xl font-bold text-brand-600">{requestsQuery.isLoading ? "…" : pending}</p>
+          <Link to="/specialist/requests" className="mt-2 inline-block text-sm text-brand-600">Перейти →</Link>
+        </div>
+        <div className="rounded-xl border border-border bg-surface p-4 shadow-sm">
+          <p className="text-sm text-text-muted">Послуг у профілі</p>
+          <p className="mt-1 text-2xl font-bold text-text">{profileQuery.isLoading ? "…" : serviceCount}</p>
+          <Link to="/specialist/services" className="mt-2 inline-block text-sm text-brand-600">Список →</Link>
+        </div>
+        <div className="rounded-xl border border-border bg-surface p-4 shadow-sm">
+          <p className="text-sm text-text-muted">Досвід</p>
+          <p className="mt-1 text-2xl font-bold text-text">
+            {profileQuery.data ? `${profileQuery.data.experienceYears} р.` : "…"}
+          </p>
+          <Link to="/specialist/profile/edit" className="mt-2 inline-block text-sm text-brand-600">Редагувати →</Link>
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-border bg-surface p-5 shadow-sm">
+        <h2 className="font-semibold text-text">Швидкі дії</h2>
+        <ul className="mt-3 flex flex-wrap gap-2 text-sm">
+          <li>
+            <Link to="/specialist/profile/edit" className="rounded-lg border border-border px-3 py-2 hover:bg-surface-tint">
+              Оновити анкету
+            </Link>
+          </li>
+          <li>
+            <Link to="/specialist/requests" className="rounded-lg border border-border px-3 py-2 hover:bg-surface-tint">
+              Обробити заявки
+            </Link>
+          </li>
+        </ul>
+        <p className="mt-4 text-xs text-text-muted">
+          Після суттєвих змін профілю адміністратор може повторно перевірити дані перед публікацією в каталозі.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+function SpecialistProfileEditForm() {
   const { user, refetchUser } = useAuth();
   const queryClient = useQueryClient();
   const [formError, setFormError] = useState<string | null>(null);
@@ -178,23 +256,11 @@ export function SpecialistDashboardPage() {
   const verificationStatus = profileQuery.data?.verificationStatus ?? user?.specialistVerificationStatus;
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6 px-4 py-8 sm:px-6">
-      <div className="rounded-xl border border-border bg-surface p-6 shadow-sm">
-        <h1 className="text-2xl font-semibold text-text">Кабінет спеціаліста</h1>
-        <p className="mt-2 text-text-muted">
-          Вітаємо, {user?.fullName}. Статус модерації:{" "}
-          <strong>{verificationStatus ?? "—"}</strong>.
-        </p>
-        <p className="mt-2 text-sm text-text-muted">{statusMessage(verificationStatus)}</p>
-        {profileQuery.data?.verificationStatus === "APPROVED" && (
-          <Link
-            to={`/specialists/${profileQuery.data.id}`}
-            className="mt-3 inline-block text-sm font-medium text-brand-600 hover:text-brand-700"
-          >
-            Переглянути публічний профіль
-          </Link>
-        )}
-      </div>
+    <section className="space-y-6">
+      <h1 className="text-2xl font-semibold text-text">Редагування профілю</h1>
+      <p className="text-sm text-text-muted">
+        Статус модерації: <strong>{verificationStatus ?? "—"}</strong>. {statusMessage(verificationStatus)}
+      </p>
 
       {profileQuery.isLoading || catalogQuery.isLoading ? (
         <p className="text-text-muted">Завантаження профілю…</p>
@@ -393,7 +459,86 @@ export function SpecialistDashboardPage() {
           </button>
         </form>
       )}
-    </div>
+    </section>
+  );
+}
+
+export function SpecialistProfileViewPage() {
+  const profileQuery = useQuery({
+    queryKey: ["specialist", "me"],
+    queryFn: fetchOwnSpecialistProfile,
+  });
+
+  if (profileQuery.isLoading) return <p className="text-text-muted">Завантаження…</p>;
+  if (profileQuery.isError || !profileQuery.data) {
+    return <p className="text-red-700">Не вдалося завантажити профіль.</p>;
+  }
+
+  const p = profileQuery.data;
+  return (
+    <section className="space-y-6">
+      <h1 className="text-2xl font-semibold text-text">Мій профіль</h1>
+      <div className="flex flex-wrap gap-6 rounded-xl border border-border bg-surface p-6 shadow-sm">
+        {p.photoUrl ? (
+          <img src={p.photoUrl} alt="Фото профілю" className="h-28 w-28 rounded-full object-cover ring-2 ring-surface-tint" />
+        ) : (
+          <div className="flex h-28 w-28 items-center justify-center rounded-full bg-surface-tint text-text-muted">Немає фото</div>
+        )}
+        <div className="min-w-0 flex-1 space-y-2">
+          <p className="text-lg font-semibold">{p.fullName}</p>
+          <p className="text-sm text-text-muted">
+            {[p.city?.name, p.district?.name].filter(Boolean).join(", ") || "Локація не вказана"}
+          </p>
+          <p className="text-sm">Статус: <strong>{p.verificationStatus}</strong></p>
+          <Link to="/specialist/profile/edit" className="text-sm font-medium text-brand-600">Редагувати →</Link>
+        </div>
+      </div>
+      <div className="rounded-xl border border-border bg-surface p-6 shadow-sm">
+        <h2 className="font-semibold">Опис</h2>
+        <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-text-muted">{p.description || "—"}</p>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="rounded-xl border border-border p-4">
+          <h3 className="text-sm font-semibold">Спеціалізації</h3>
+          <p className="mt-2 text-sm text-text-muted">{p.specializations.map((s) => s.name).join(", ")}</p>
+        </div>
+        <div className="rounded-xl border border-border p-4">
+          <h3 className="text-sm font-semibold">Формати</h3>
+          <p className="mt-2 text-sm text-text-muted">{p.formats.map((f) => f.name).join(", ")}</p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export function SpecialistServicesPage() {
+  const profileQuery = useQuery({
+    queryKey: ["specialist", "me"],
+    queryFn: fetchOwnSpecialistProfile,
+  });
+
+  return (
+    <section className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-2xl font-semibold text-text">Мої послуги</h1>
+        <Link to="/specialist/profile/edit" className="text-sm font-medium text-brand-600">Редагувати послуги</Link>
+      </div>
+      {profileQuery.isLoading ? (
+        <p className="text-text-muted">Завантаження…</p>
+      ) : profileQuery.data?.services.length === 0 ? (
+        <p className="text-text-muted">Послуги ще не додані.</p>
+      ) : (
+        <ul className="space-y-3">
+          {profileQuery.data?.services.map((service) => (
+            <li key={service.id} className="rounded-xl border border-border bg-surface p-4 shadow-sm">
+              <p className="font-medium text-text">{service.name}</p>
+              {service.description && <p className="mt-1 text-sm text-text-muted">{service.description}</p>}
+              <p className="mt-2 text-sm font-semibold text-brand-600">{service.price} грн</p>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }
 
@@ -427,7 +572,7 @@ function CheckboxGroup({
 }
 
 export function SpecialistProfileEditPage() {
-  return <SpecialistDashboardPage />;
+  return <SpecialistProfileEditForm />;
 }
 
 function specialistRequestStatusLabel(status: string) {
@@ -473,7 +618,7 @@ export function SpecialistRequestsPage() {
   });
 
   return (
-    <section className="mx-auto max-w-4xl space-y-6 px-4 py-8">
+    <section className="space-y-6">
       <div className="rounded-xl border border-border bg-surface p-6 shadow-sm">
         <h1 className="text-2xl font-semibold text-text">Заявки на консультацію</h1>
         <p className="mt-2 text-sm text-text-muted">

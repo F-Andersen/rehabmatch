@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { AdminLayout } from "./components/AdminLayout";
 import { AppLayout } from "./components/AppLayout";
 import { PatientLayout } from "./components/PatientLayout";
+import { SpecialistLayout } from "./components/SpecialistLayout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import {
   AdminCriteriaPage,
@@ -31,7 +32,9 @@ import { AboutPage, ContactsPage, HowItWorksPage } from "./pages/StaticPages";
 import {
   SpecialistDashboardPage,
   SpecialistProfileEditPage,
+  SpecialistProfileViewPage,
   SpecialistRequestsPage,
+  SpecialistServicesPage,
 } from "./pages/SpecialistPortalPages";
 import { SpecialistDetailPage, SpecialistsListPage } from "./pages/SpecialistsPages";
 
@@ -105,29 +108,18 @@ export default function App() {
           />
 
           <Route
-            path="specialist/dashboard"
             element={
               <ProtectedRoute roles={["SPECIALIST"]}>
-                <SpecialistDashboardPage />
+                <SpecialistLayout />
               </ProtectedRoute>
             }
-          />
-          <Route
-            path="specialist/profile/edit"
-            element={
-              <ProtectedRoute roles={["SPECIALIST"]}>
-                <SpecialistProfileEditPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="specialist/requests"
-            element={
-              <ProtectedRoute roles={["SPECIALIST"]}>
-                <SpecialistRequestsPage />
-              </ProtectedRoute>
-            }
-          />
+          >
+            <Route path="specialist/dashboard" element={<SpecialistDashboardPage />} />
+            <Route path="specialist/profile" element={<SpecialistProfileViewPage />} />
+            <Route path="specialist/profile/edit" element={<SpecialistProfileEditPage />} />
+            <Route path="specialist/services" element={<SpecialistServicesPage />} />
+            <Route path="specialist/requests" element={<SpecialistRequestsPage />} />
+          </Route>
 
           <Route
             path="admin"

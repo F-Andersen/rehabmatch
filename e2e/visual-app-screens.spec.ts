@@ -33,7 +33,7 @@ test.describe("thesis app screens", () => {
     await registerPatient(page, patientEmail);
 
     await page.goto("/dashboard");
-    await expect(page.getByRole("heading", { name: "Кабінет пацієнта" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Огляд" })).toBeVisible();
     await shot(page, "patient-dashboard", viewport.tag);
 
     await page.goto("/matching/new");

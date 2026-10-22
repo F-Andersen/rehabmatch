@@ -1,17 +1,22 @@
 # Product Acceptance — RehabMatch
 
-Статус документа: **PARTIAL** (очікує browser QA Phase 6).
+Оновлено: **2026-10-22**.
 
-| Область | Критерій DONE | Статус | Доказ |
-|---------|---------------|--------|-------|
-| Auth RBAC | E2E security + login | COMPLETE | `npm run e2e` |
-| Patient cabinet | Усі розділи з меню | PARTIAL | `/profile`, `/my-reviews` додано 2026-10-22 |
-| Specialist portal | Профіль + заявки + фото | PARTIAL | photo upload новий |
-| Admin | CRUD + модерація | COMPLETE | E2E admin sections |
-| Catalog | API + UI фільтри | COMPLETE | showcase:verify-catalog |
-| AHP/WSM | Integration tests | COMPLETE | vitest + e2e matching |
-| Showcase DB | verify без reset | COMPLETE | showcase:verify |
-| Public content + stock | ASSET-SOURCES + hero | PARTIAL | 4 images |
-| final-product screenshots | Phase 6 | MISSING | — |
+| Область | Критерій | Статус | Доказ |
+|---------|----------|--------|-------|
+| Auth / RBAC | E2E login, register, security | COMPLETE | `npm run e2e` 39/39 |
+| Patient cabinet | Sidebar, profile, reviews, requests, matching | COMPLETE | E2E matching + final-product screenshots |
+| Specialist cabinet | Layout, edit, photo, services, requests | COMPLETE | E2E workflows + specialist-dashboard screenshot |
+| Admin panel | 7 розділів, мутації на e2e DB | COMPLETE | `full-workflows`, `thesis-public-admin-screens` |
+| Catalog / profile | API, 48 portraits, filters | COMPLETE | `showcase:verify-catalog`, smoke |
+| AHP / WSM | Integration + E2E matching | COMPLETE | `matching.spec`, `ahp.integration` |
+| Public Home/About/How/FAQ | Контент + 4 stock images | COMPLETE | final-product PNGs |
+| Showcase DB | Без reset, counts stable | COMPLETE | `showcase:verify` |
+| Phone privacy | Не в public catalog API | COMPLETE | лише `auth/me`, `PATCH /me` |
+| Photo upload security | RBAC + type/size/path | COMPLETE | `specialist-photo-upload.ts` |
+| Mobile browser matrix | 375/768 manual | PARTIAL | Playwright лише desktop final-product |
+| Favorites / compare | — | MISSING | out of scope |
 
-**DONE заборонено** до заповнення колонки «Доказ» для всіх рядків P0.
+**Загальний статус: PARTIAL** (не COMPLETE через відсутність повної мобільної browser-матриці та P3 features).
+
+Скріншоти: `docs/thesis/screenshots/final-product/*-desktop-1440.png`.

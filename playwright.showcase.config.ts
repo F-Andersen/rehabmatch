@@ -17,7 +17,11 @@ const showcaseDatabaseUrl = process.env.SHOWCASE_DATABASE_URL ?? process.env.DAT
 
 export default defineConfig({
   testDir: "./e2e",
-  testMatch: [/showcase-smoke\.spec\.ts/, /showcase-acceptance-screens\.spec\.ts/],
+  testMatch: [
+    /showcase-smoke\.spec\.ts/,
+    /showcase-acceptance-screens\.spec\.ts/,
+    /final-product-screens\.spec\.ts/,
+  ],
   timeout: 90_000,
   fullyParallel: false,
   workers: 1,
@@ -56,6 +60,11 @@ export default defineConfig({
       name: "showcase-chromium",
       testMatch: /showcase-smoke\.spec\.ts/,
       use: { ...devices["Desktop Chrome"] },
+    },
+    {
+      name: "final-product",
+      testMatch: /final-product-screens\.spec\.ts/,
+      use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } },
     },
   ],
 });

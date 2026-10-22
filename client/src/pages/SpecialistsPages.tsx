@@ -28,7 +28,7 @@ function SpecialistAvatar({ name, photoUrl }: { name: string; photoUrl: string |
       <img
         src={photoUrl}
         alt={`Фото спеціаліста ${name}`}
-        className="h-16 w-16 shrink-0 rounded-full object-cover ring-2 ring-surface-tint"
+        className="h-20 w-20 shrink-0 rounded-full object-cover ring-2 ring-surface-tint shadow-sm"
       />
     );
   }
@@ -73,7 +73,7 @@ function SpecialistCardView({ specialist }: { specialist: SpecialistCard }) {
   const specialization = specialist.specializations.map((s) => s.name).join(", ");
 
   return (
-    <article className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-5 shadow-sm sm:flex-row sm:items-start">
+    <article className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-5 shadow-sm transition hover:border-brand-600/30 hover:shadow-md sm:flex-row sm:items-start">
       <SpecialistAvatar name={specialist.fullName} photoUrl={specialist.photoUrl} />
       <div className="min-w-0 flex-1 space-y-2">
         <div className="flex flex-wrap items-start justify-between gap-2">
@@ -322,7 +322,20 @@ export function SpecialistsListPage() {
 
         <section className="space-y-4">
           {catalogQuery.isLoading || listQuery.isLoading ? (
-            <p className="text-text-muted">Завантаження каталогу…</p>
+            <ul className="space-y-4" aria-busy="true" aria-label="Завантаження">
+              {[1, 2, 3].map((i) => (
+                <li key={i} className="animate-pulse rounded-xl border border-border bg-surface p-5">
+                  <div className="flex gap-4">
+                    <div className="h-20 w-20 rounded-full bg-surface-tint" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 w-1/3 rounded bg-surface-tint" />
+                      <div className="h-3 w-2/3 rounded bg-surface-tint" />
+                      <div className="h-3 w-1/4 rounded bg-surface-tint" />
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
           ) : listQuery.isError ? (
             <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
               Не вдалося завантажити список. Спробуйте оновити сторінку.
