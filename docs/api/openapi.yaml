@@ -821,6 +821,12 @@ paths:
       security:
         - rehabmatchSession: []
       parameters:
+        - name: q
+          in: query
+          description: Case-insensitive full-dataset search by name or email before pagination.
+          schema:
+            type: string
+            maxLength: 254
         - name: role
           in: query
           schema:

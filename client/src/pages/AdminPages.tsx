@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { apiRequest, ApiError } from "../lib/api";
 import { useAuth } from "../features/auth/AuthProvider";
@@ -126,14 +126,16 @@ export function AdminUsersPage() {
   const [roleFilter, setRoleFilter] = useState<string>("");
   const [activeFilter, setActiveFilter] = useState<string>("");
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
   const [message, setMessage] = useState<string | null>(null);
 
   const listQuery = useQuery({
-    queryKey: ["admin", "users", roleFilter, activeFilter],
+    queryKey: ["admin", "users", roleFilter, activeFilter, search, page],
     queryFn: () =>
       fetchAdminUsers({
-        page: "1",
+        page: String(page),
         pageSize: "50",
+        q: search.trim() || undefined,
         role: roleFilter || undefined,
         isActive: activeFilter || undefined,
       }),
@@ -151,25 +153,18 @@ export function AdminUsersPage() {
     },
   });
 
-  const filteredUsers = useMemo(() => {
-    const rows = listQuery.data?.data ?? [];
-    const q = search.trim().toLowerCase();
-    if (!q) return rows;
-    return rows.filter(
-      (user) =>
-        user.fullName.toLowerCase().includes(q) || user.email.toLowerCase().includes(q),
-    );
-  }, [listQuery.data?.data, search]);
+  const filteredUsers = listQuery.data?.data ?? [];
 
   return (
     <section className="space-y-6">
       <h1 className="text-2xl font-semibold text-text">Користувачі</h1>
       <input
         type="search"
+        aria-label="Пошук користувачів за ПІБ або email"
         placeholder="Пошук за ПІБ або email"
         className="w-full max-w-md rounded-lg border border-border px-3 py-2 text-sm"
         value={search}
-        onChange={(event) => setSearch(event.target.value)}
+        onChange={(event) => { setSearch(event.target.value); setPage(1); }}
       />
       <div className="flex flex-wrap gap-2">
         {["", "PATIENT", "SPECIALIST", "ADMIN"].map((role) => (
@@ -180,7 +175,7 @@ export function AdminUsersPage() {
               "rounded-lg px-3 py-1.5 text-sm",
               roleFilter === role ? "bg-brand-600 text-white" : "border border-border",
             ].join(" ")}
-            onClick={() => setRoleFilter(role)}
+            onClick={() => { setRoleFilter(role); setPage(1); }}
           >
             {role || "Усі ролі"}
           </button>
@@ -193,7 +188,7 @@ export function AdminUsersPage() {
               "rounded-lg px-3 py-1.5 text-sm",
               activeFilter === value ? "bg-brand-600 text-white" : "border border-border",
             ].join(" ")}
-            onClick={() => setActiveFilter(value)}
+            onClick={() => { setActiveFilter(value); setPage(1); }}
           >
             {value === "" ? "Усі статуси" : value === "true" ? "Активні" : "Деактивовані"}
           </button>
@@ -202,6 +197,8 @@ export function AdminUsersPage() {
       {message && <p className="text-sm text-text-muted">{message}</p>}
       {listQuery.isLoading ? (
         <p className="text-text-muted">Завантаження…</p>
+      ) : listQuery.isError ? (
+        <p role="alert" className="text-sm text-red-700">Не вдалося завантажити користувачів.</p>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-border">
         <table className="w-full min-w-[640px] text-left text-sm">
@@ -241,9 +238,13 @@ export function AdminUsersPage() {
         </div>
       )}
       {listQuery.data?.meta && (
+        <nav aria-label="Пагінація користувачів" className="flex flex-wrap items-center gap-3">
         <p className="text-xs text-text-muted">
           Сторінка {listQuery.data.meta.page} · показано {filteredUsers.length} з {listQuery.data.meta.total}
         </p>
+        <button type="button" disabled={page <= 1} className="min-h-11 rounded-lg border px-3 disabled:opacity-40" onClick={() => setPage(p => p - 1)}>Назад</button>
+        <button type="button" disabled={page * 50 >= listQuery.data.meta.total} className="min-h-11 rounded-lg border px-3 disabled:opacity-40" onClick={() => setPage(p => p + 1)}>Далі</button>
+        </nav>
       )}
     </section>
   );

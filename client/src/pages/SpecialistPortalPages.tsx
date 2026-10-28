@@ -56,6 +56,10 @@ function statusMessage(status: string | null | undefined) {
   }
 }
 
+function verificationLabel(status: string | null | undefined) {
+  return status === "APPROVED" ? "Підтверджено" : status === "PENDING" ? "На перевірці" : status === "REJECTED" ? "Відхилено" : "—";
+}
+
 export function SpecialistDashboardPage() {
   const { user } = useAuth();
   const profileQuery = useQuery({
@@ -78,7 +82,7 @@ export function SpecialistDashboardPage() {
         <h1 className="text-2xl font-semibold text-text">Огляд</h1>
         <p className="mt-2 text-text-muted">Вітаємо, {user?.fullName}.</p>
         <p className="mt-3 rounded-lg bg-surface-tint px-4 py-3 text-sm">
-          Статус модерації: <strong>{verificationStatus ?? "—"}</strong>
+          Статус модерації: <strong>{verificationLabel(verificationStatus)}</strong>
           <br />
           <span className="text-text-muted">{statusMessage(verificationStatus)}</span>
         </p>
@@ -152,6 +156,7 @@ function SpecialistProfileEditForm() {
     handleSubmit,
     reset,
     watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -259,7 +264,7 @@ function SpecialistProfileEditForm() {
     <section className="space-y-6">
       <h1 className="text-2xl font-semibold text-text">Редагування профілю</h1>
       <p className="text-sm text-text-muted">
-        Статус модерації: <strong>{verificationStatus ?? "—"}</strong>. {statusMessage(verificationStatus)}
+        Статус модерації: <strong>{verificationLabel(verificationStatus)}</strong>. {statusMessage(verificationStatus)}
       </p>
 
       {profileQuery.isLoading || catalogQuery.isLoading ? (
@@ -360,7 +365,7 @@ function SpecialistProfileEditForm() {
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label htmlFor="cityId" className="mb-1 block text-sm font-medium">Місто</label>
-              <select id="cityId" className={inputClass} {...register("cityId")}>
+              <select id="cityId" className={inputClass} {...register("cityId", { onChange: () => setValue("districtId", "") })} value={cityId}>
                 <option value="">Оберіть місто</option>
                 {catalogQuery.data?.cities.map((city) => (
                   <option key={city.id} value={city.id}>{city.name}</option>
@@ -369,7 +374,7 @@ function SpecialistProfileEditForm() {
             </div>
             <div>
               <label htmlFor="districtId" className="mb-1 block text-sm font-medium">Район</label>
-              <select id="districtId" className={inputClass} {...register("districtId")}>
+              <select id="districtId" className={inputClass} {...register("districtId")} value={watch("districtId")}>
                 <option value="">Оберіть район</option>
                 {districtsForCity.map((district) => (
                   <option key={district.id} value={district.id}>{district.name}</option>
@@ -489,7 +494,7 @@ export function SpecialistProfileViewPage() {
           <p className="text-sm text-text-muted">
             {[p.city?.name, p.district?.name].filter(Boolean).join(", ") || "Локація не вказана"}
           </p>
-          <p className="text-sm">Статус: <strong>{p.verificationStatus}</strong></p>
+          <p className="text-sm">Статус: <strong>{verificationLabel(p.verificationStatus)}</strong></p>
           <Link to="/specialist/profile/edit" className="text-sm font-medium text-brand-600">Редагувати →</Link>
         </div>
       </div>
@@ -637,7 +642,7 @@ export function SpecialistRequestsPage() {
               ].join(" ")}
               onClick={() => setStatusFilter(value)}
             >
-              {value === "" ? "Усі" : value}
+              {value === "" ? "Усі" : specialistRequestStatusLabel(value)}
             </button>
           ))}
         </div>

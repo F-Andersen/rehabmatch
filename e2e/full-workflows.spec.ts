@@ -147,7 +147,7 @@ test("consultation request and specialist response", async ({ page, request }) =
   expect(accept.status()).toBe(200);
 
   await page.goto("/specialist/requests");
-  await expect(page.getByText("Прийнято")).toBeVisible();
+  await expect(page.getByRole("listitem").filter({ hasText: "E2E consultation" }).getByText("Прийнято", { exact: true })).toBeVisible();
 });
 
 test("review pending then admin approval updates public rating", async ({ page, request }) => {

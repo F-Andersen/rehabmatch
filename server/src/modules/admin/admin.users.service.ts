@@ -5,6 +5,7 @@ import { prisma } from "../../lib/prisma.js";
 import { z } from "zod";
 
 export const adminUsersQuerySchema = z.object({
+  q: z.string().trim().max(254).optional(),
   role: z.nativeEnum(UserRole).optional(),
   isActive: z
     .string()
@@ -22,6 +23,10 @@ export type AdminUsersQuery = z.infer<typeof adminUsersQuerySchema>;
 
 export async function listUsersForAdmin(query: AdminUsersQuery) {
   const where = {
+    ...(query.q ? { OR: [
+      { fullName: { contains: query.q, mode: "insensitive" as const } },
+      { email: { contains: query.q, mode: "insensitive" as const } },
+    ] } : {}),
     ...(query.role ? { role: query.role } : {}),
     ...(query.isActive !== undefined ? { isActive: query.isActive } : {}),
   };

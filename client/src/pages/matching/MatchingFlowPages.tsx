@@ -39,6 +39,7 @@ export function MatchingNewPage() {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<MatchingSearchFormValues>({
     resolver: zodResolver(matchingSearchSchema),
@@ -93,8 +94,8 @@ export function MatchingNewPage() {
         {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800">{error}</p>}
 
         <div>
-          <label className="mb-1 block text-sm font-medium">Тип травми / захворювання</label>
-          <select className={inputClass} {...register("injuryTypeId")}>
+          <label htmlFor="matching-injury" className="mb-1 block text-sm font-medium">Тип травми / захворювання</label>
+          <select id="matching-injury" className={inputClass} {...register("injuryTypeId")}>
             <option value="">Оберіть…</option>
             {catalog.data?.injuryTypes.map((item) => (
               <option key={item.id} value={item.id}>{item.name}</option>
@@ -104,8 +105,8 @@ export function MatchingNewPage() {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium">Спеціалізація (необовʼязково)</label>
-          <select className={inputClass} {...register("specializationId")}>
+          <label htmlFor="matching-specialization" className="mb-1 block text-sm font-medium">Спеціалізація (необовʼязково)</label>
+          <select id="matching-specialization" className={inputClass} {...register("specializationId")}>
             <option value="">Будь-яка</option>
             {catalog.data?.specializations.map((item) => (
               <option key={item.id} value={item.id}>{item.name}</option>
@@ -115,8 +116,8 @@ export function MatchingNewPage() {
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="mb-1 block text-sm font-medium">Місто</label>
-            <select className={inputClass} {...register("cityId")} value={cityId}>
+            <label htmlFor="matching-city" className="mb-1 block text-sm font-medium">Місто</label>
+            <select id="matching-city" className={inputClass} {...register("cityId", { onChange: () => setValue("districtId", "") })} value={cityId}>
               <option value="">Не вказано</option>
               {catalog.data?.cities.map((item) => (
                 <option key={item.id} value={item.id}>{item.name}</option>
@@ -124,8 +125,8 @@ export function MatchingNewPage() {
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium">Район</label>
-            <select className={inputClass} {...register("districtId")}>
+            <label htmlFor="matching-district" className="mb-1 block text-sm font-medium">Район</label>
+            <select id="matching-district" className={inputClass} {...register("districtId")} value={watch("districtId")}>
               <option value="">Не вказано</option>
               {districts.map((item) => (
                 <option key={item.id} value={item.id}>{item.name}</option>
@@ -135,8 +136,8 @@ export function MatchingNewPage() {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium">Формат консультації</label>
-          <select className={inputClass} {...register("formatId")}>
+          <label htmlFor="matching-format" className="mb-1 block text-sm font-medium">Формат консультації</label>
+          <select id="matching-format" className={inputClass} {...register("formatId")}>
             <option value="">Не вказано</option>
             {catalog.data?.formats.map((item) => (
               <option key={item.id} value={item.id}>{item.name}</option>
@@ -145,8 +146,8 @@ export function MatchingNewPage() {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium">Максимальний бюджет (грн)</label>
-          <input type="number" min={1} className={inputClass} {...register("maxBudget")} />
+          <label htmlFor="matching-budget" className="mb-1 block text-sm font-medium">Максимальний бюджет (грн)</label>
+          <input id="matching-budget" type="number" min={1} className={inputClass} {...register("maxBudget")} />
           {errors.maxBudget && <p className="mt-1 text-xs text-red-600">{errors.maxBudget.message}</p>}
         </div>
 
@@ -234,6 +235,7 @@ function MatchingCriteriaForm({ search }: { search: SearchRequestDetail }) {
   }, [searchRequestId, comparisons, priorities, mode]);
 
   const currentPair = PAIR_STEPS[stepIndex];
+  const selectedPairValue = currentPair ? comparisons[comparisonKey(currentPair.criterionA, currentPair.criterionB)] : undefined;
   const comparisonsList = useMemo(
     () =>
       PAIR_STEPS.map((pair) => {
@@ -325,10 +327,10 @@ function MatchingCriteriaForm({ search }: { search: SearchRequestDetail }) {
           <div className="mt-4 space-y-2">
             {SAATY_SCALE.map((scale) => (
               <div key={scale.value} className="flex flex-wrap gap-2">
-                <button type="button" className="flex-1 rounded-lg border border-border px-2 py-1.5 text-left text-sm hover:bg-surface-tint" onClick={() => setPairValue(scale.value, currentPair.criterionA)}>
+                <button type="button" aria-pressed={selectedPairValue === scale.value} className="min-h-11 flex-1 rounded-lg border border-border px-2 py-1.5 text-left text-sm hover:bg-surface-tint aria-pressed:bg-brand-600 aria-pressed:text-white" onClick={() => setPairValue(scale.value, currentPair.criterionA)}>
                   {CRITERION_LABELS[currentPair.criterionA]} — {scale.label}
                 </button>
-                <button type="button" className="flex-1 rounded-lg border border-border px-2 py-1.5 text-left text-sm hover:bg-surface-tint" onClick={() => setPairValue(scale.value, currentPair.criterionB)}>
+                <button type="button" aria-pressed={selectedPairValue === 1 / scale.value} className="min-h-11 flex-1 rounded-lg border border-border px-2 py-1.5 text-left text-sm hover:bg-surface-tint aria-pressed:bg-brand-600 aria-pressed:text-white" onClick={() => setPairValue(scale.value, currentPair.criterionB)}>
                   {CRITERION_LABELS[currentPair.criterionB]} — {scale.label}
                 </button>
               </div>
@@ -345,11 +347,11 @@ function MatchingCriteriaForm({ search }: { search: SearchRequestDetail }) {
         <section className="mt-6 space-y-4 rounded-xl border border-border bg-surface p-6 shadow-sm">
           {(Object.keys(CRITERION_LABELS) as CriterionKey[]).map((key) => (
             <div key={key}>
-              <label className="mb-1 flex justify-between text-sm font-medium">
+              <label htmlFor={`priority-${key}`} className="mb-1 flex justify-between text-sm font-medium">
                 <span>{CRITERION_LABELS[key]}</span>
                 <span>{priorities[key]}</span>
               </label>
-              <input type="range" min={1} max={9} step={1} value={priorities[key]} onChange={(e) => setPriorities((p) => ({ ...p, [key]: Number(e.target.value) }))} className="w-full" />
+              <input id={`priority-${key}`} type="range" min={1} max={9} step={1} value={priorities[key]} onChange={(e) => setPriorities((p) => ({ ...p, [key]: Number(e.target.value) }))} className="min-h-11 w-full" />
             </div>
           ))}
         </section>
@@ -422,7 +424,7 @@ export function RecommendationDetailPage() {
         <h2 className="text-sm font-semibold">Ваги критеріїв</h2>
         <div className="mt-2 flex flex-wrap gap-2 text-sm">
           {Object.entries(rec.weights).map(([key, weight]) => (
-            <span key={key} className="rounded-full bg-surface-tint px-2 py-0.5">{key}: {(weight * 100).toFixed(0)}%</span>
+            <span key={key} className="rounded-full bg-surface-tint px-2 py-0.5">{CRITERION_LABELS[key as CriterionKey] ?? key}: {(weight * 100).toFixed(0)}%</span>
           ))}
         </div>
       </section>
@@ -449,7 +451,7 @@ export function RecommendationDetailPage() {
                   <tbody>
                     {item.factors.map((f) => (
                       <tr key={f.key} className="border-t border-border">
-                        <td className="py-1">{f.key}</td>
+                        <td className="py-1">{CRITERION_LABELS[f.key as CriterionKey] ?? f.key}</td>
                         <td>{f.contribution.toFixed(3)}</td>
                         <td>{f.normalizedValue.toFixed(2)}</td>
                       </tr>
