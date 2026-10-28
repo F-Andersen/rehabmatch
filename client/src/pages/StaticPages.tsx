@@ -238,7 +238,7 @@ const faqItems = [
   },
   {
     q: "Як спеціалісту потрапити в каталог?",
-    a: "Зареєструйтесь із роллю SPECIALIST, заповніть профіль і дочекайтесь схвалення адміністратора (статус APPROVED).",
+    a: "Зареєструйтеся як спеціаліст, заповніть профіль і дочекайтеся схвалення адміністратора. Після цього анкета з’явиться в каталозі.",
   },
   {
     q: "Чи зберігаються мої рекомендації?",
@@ -246,7 +246,11 @@ const faqItems = [
   },
   {
     q: "Куди звернутися з технічними питаннями?",
-    a: "Використовуйте контакти нижче, якщо вони налаштовані власником інсталяції.",
+    a: "Повідомте про помилку через GitHub або скористайтеся опублікованими контактами. Для створення звернення на GitHub потрібен обліковий запис.",
+  },
+  {
+    q: "Заявку прийнято — це вже підтверджений час прийому?",
+    a: "Прийнята заявка означає згоду спеціаліста опрацювати звернення. Остаточний час і деталі консультації потрібно узгодити зі спеціалістом окремо.",
   },
 ];
 
@@ -256,38 +260,52 @@ export function ContactsPage() {
       <header>
         <h1 className="text-3xl font-bold text-text">Контакти та підтримка</h1>
         <p className="mt-3 text-text-muted">
-          Зв’язок із командою проєкту або адміністратором інсталяції RehabMatch.
+          Допомога з роботою RehabMatch, повідомлення про помилки та відповіді на поширені запитання.
         </p>
       </header>
 
-      <section className="rounded-xl border border-border bg-surface p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-text">Способи зв’язку</h2>
+      <section className="rounded-xl border border-border bg-surface p-5 sm:p-6">
+        <h2 className="text-xl font-semibold text-text">Технічна підтримка</h2>
+        <p className="mt-3 text-sm leading-relaxed text-text-muted">
+          Щось працює не так або маєте пропозицію? Перегляньте наявні звернення чи опишіть проблему на GitHub.
+        </p>
+        <a href={publicContact.issuesUrl} target="_blank" rel="noopener noreferrer"
+          className="mt-4 inline-flex min-h-11 items-center justify-center rounded-xl bg-brand-600 px-5 py-3 text-sm font-semibold text-white hover:bg-brand-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-600">
+          Повідомити про помилку на GitHub ↗
+        </a>
+        <p className="mt-3 text-sm text-text-muted">Відкриється нова вкладка. Для створення звернення потрібен обліковий запис GitHub.</p>
         {hasConfiguredContact ? (
           <ul className="mt-4 space-y-2 text-sm text-text-muted">
             {publicContact.supportEmail && (
               <li>
                 Email:{" "}
-                <a className="font-medium text-brand-600" href={`mailto:${publicContact.supportEmail}`}>
+                <a className="inline-flex min-h-11 items-center break-all font-medium text-brand-600 underline underline-offset-4" href={`mailto:${publicContact.supportEmail}`}>
                   {publicContact.supportEmail}
                 </a>
               </li>
             )}
             {publicContact.supportPhone && (
               <li>
-                Телефон: <span className="font-medium text-text">{publicContact.supportPhone}</span>
+                Телефон: <a className="inline-flex min-h-11 items-center font-medium text-brand-600 underline underline-offset-4" href={`tel:${publicContact.supportPhone.replace(/[^+\d]/g, "")}`}>{publicContact.supportPhone}</a>
               </li>
             )}
             {publicContact.officeNote && <li>{publicContact.officeNote}</li>}
           </ul>
         ) : (
           <p className="mt-4 text-sm leading-relaxed text-text-muted">
-            Публічні контакти ще не налаштовані. Власнику інсталяції потрібно додати в локальний{" "}
-            <code className="rounded bg-surface-tint px-1">.env</code> змінні{" "}
-            <code className="rounded bg-surface-tint px-1">VITE_CONTACT_EMAIL</code>,{" "}
-            <code className="rounded bg-surface-tint px-1">VITE_CONTACT_PHONE</code>,{" "}
-            <code className="rounded bg-surface-tint px-1">VITE_CONTACT_OFFICE</code> (не комітити в Git).
+            Email і телефон підтримки поки не опубліковані. Для технічних питань доступні звернення на GitHub.
           </p>
         )}
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-lg font-semibold text-text">Як описати проблему</h2>
+        <ol className="list-decimal space-y-2 pl-5 text-sm leading-relaxed text-text-muted">
+          <li>Вкажіть сторінку, свою роль і дії, після яких виникла помилка.</li>
+          <li>Опишіть очікуваний результат і те, що відбулося. Додайте назву браузера та пристрою.</li>
+          <li>За потреби додайте знімок екрана, приховавши особисті дані.</li>
+        </ol>
+        <p className="text-sm leading-relaxed text-text-muted">Звернення на GitHub публічні. Не додавайте паролі, медичні документи або персональні дані.</p>
       </section>
 
       <section className="space-y-3">
@@ -314,9 +332,10 @@ export function ContactsPage() {
       </section>
 
       <p className="text-sm text-text-muted">
-        Онлайн-форма звернень у цьому прототипі не реалізована, щоб не створювати ілюзію доставки повідомлень без backend.
-        Для демонстрації використовуйте{" "}
-        <Link to="/about" className="text-brand-600 hover:text-brand-700">розділ «Про систему»</Link>.
+        Питання про підбір фахівця? Перегляньте{" "}
+        <Link to="/how-it-works" className="text-brand-600 underline underline-offset-4 hover:text-brand-700">як працює система</Link>{" "}
+        або відкрийте{" "}
+        <Link to="/specialists" className="text-brand-600 underline underline-offset-4 hover:text-brand-700">каталог спеціалістів</Link>.
       </p>
     </article>
   );

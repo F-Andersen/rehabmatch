@@ -4,6 +4,8 @@
 
 **Стек:** React (Vite) + TypeScript · Express + TypeScript · PostgreSQL · Prisma.
 
+Демонстраційний сайт: [RehabMatch](http://188.137.232.136:8083). Дані профілів вигадані. [Повідомлення про помилки та пропозиції](https://github.com/F-Andersen/rehabmatch/issues) публічні; не додавайте туди паролі, медичні документи й персональні дані.
+
 Контракт API: `docs/api/openapi.yaml`. Дипломні матеріали, плани та звіти перевірок зберігаються локально й не входять у поточний checkout.
 
 ## Вимоги
@@ -82,7 +84,13 @@ npm run dev:showcase
 
 Frontend: `http://localhost:5184`, API: `http://localhost:3021`. Портрети вже включені в репозиторій; повторно генерувати їх не потрібно. Seed зв'язує їх зі стабільними профілями `sc-001`–`sc-048`.
 
-Вхід пацієнта: `showcase.patient-01@example.test`; спеціаліста: `specialist.sc-001@example.test`. Для обох пароль береться з `SHOWCASE_SEED_PASSWORD`; адміністратор — із `SEED_ADMIN_*`.
+Вхід пацієнта: `showcase.patient-01@example.test`; спеціаліста: `specialist.sc-001@example.test`. Showcase-seed спочатку задає всім демокористувачам, включно з адміністратором, `SHOWCASE_SEED_PASSWORD` (або `SEED_ADMIN_PASSWORD`, якщо перший не заданий). На сервері команда `deploy/bootstrap-admin.mjs` нижче встановлює адміністратору окремий `SEED_ADMIN_PASSWORD`.
+
+## Контакти та підтримка
+
+Сторінка `/contacts` містить посилання на GitHub Issues, підказки для опису проблеми, FAQ та опубліковані власником контакти. Якщо email і телефон не задані, залишається робоче посилання на GitHub. Для створення звернення потрібен обліковий запис GitHub. Вбудованої форми надсилання повідомлень немає.
+
+За потреби заповніть `VITE_CONTACT_EMAIL`, `VITE_CONTACT_PHONE`, `VITE_CONTACT_OFFICE` у локальному `.env`, а для Docker — у `.env.deploy`. Email відкривається через `mailto:`, телефон — через `tel:`. Ці значення публічні й вбудовуються під час збірки: після зміни перезапустіть Vite або перебудуйте web-контейнер. Секрети у `VITE_*` заборонені.
 
 ## Тестування
 
@@ -112,6 +120,17 @@ docker compose --env-file .env.deploy -f compose.deploy.yml exec -T api node --i
 ```
 
 Seed виконуйте лише для початкового наповнення окремої демонстраційної БД. Цей профіль призначений для HTTP-демонстрації з вигаданими даними: Nginx прибирає `Secure` з cookie сесії, щоб вхід працював за IP без TLS. Для HTTPS приберіть `proxy_cookie_flags ... nosecure` та оновіть `CLIENT_ORIGIN`. Секрети й резервні копії не входять у Git.
+
+## Оновлення на сервері без повторного seed
+
+Після доставки оновленого коду в каталог застосунку виконайте з цього каталогу:
+
+```bash
+docker compose --env-file .env.deploy -f compose.deploy.yml build web
+docker compose --env-file .env.deploy -f compose.deploy.yml up -d --no-deps web
+```
+
+Це команда для змін frontend і контактів. Для змін API окремо перебудуйте й оновіть `api`; міграції застосовуйте перед запуском нової версії API, якщо вони додані. Зберігайте приватний `.env.deploy`, volumes і резервні копії. Повторний showcase-seed може перезаписати демопрофілі й паролі; для звичайного оновлення він не потрібен. Не використовуйте `down -v`, якщо потрібно зберегти БД і фото.
 
 ## Обмеження MVP
 

@@ -33,6 +33,10 @@ services:
     build:
       context: .
       target: web
+      args:
+        VITE_CONTACT_EMAIL: ${VITE_CONTACT_EMAIL:-}
+        VITE_CONTACT_PHONE: ${VITE_CONTACT_PHONE:-}
+        VITE_CONTACT_OFFICE: ${VITE_CONTACT_OFFICE:-}
     restart: unless-stopped
     ports:
       - "${PUBLIC_PORT:-8083}:80"

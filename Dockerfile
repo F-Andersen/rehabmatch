@@ -6,6 +6,9 @@ COPY client/package.json client/package.json
 COPY server/package.json server/package.json
 RUN npm ci
 COPY . .
+ARG VITE_CONTACT_EMAIL=""
+ARG VITE_CONTACT_PHONE=""
+ARG VITE_CONTACT_OFFICE=""
 RUN npm run db:generate && npm run build
 
 FROM build AS api
