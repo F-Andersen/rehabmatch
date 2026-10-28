@@ -126,6 +126,14 @@ export async function resolveSessionFromToken(token: string): Promise<{
 
 export async function updateCurrentUser(userId: string, input: UpdateMeInput): Promise<SessionUser> {
   const data: Prisma.UserUpdateInput = {};
+  if (input.cityId !== undefined) {
+    const patient = await prisma.patient.findUnique({ where: { userId } });
+    if (!patient) throw new AppError(403, "FORBIDDEN", "Місто пацієнта може змінювати лише пацієнт");
+    if (input.cityId && !await prisma.city.findUnique({ where: { id: input.cityId } })) {
+      throw new AppError(400, "VALIDATION_ERROR", "Оберіть місто з довідника");
+    }
+    data.patient = { update: { cityId: input.cityId } };
+  }
   if (input.fullName !== undefined) data.fullName = input.fullName;
   if (input.phone !== undefined) data.phone = input.phone;
 

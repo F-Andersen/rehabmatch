@@ -399,6 +399,7 @@ function SpecialistReviewSection({ specialistId }: { specialistId: string }) {
   const queryClient = useQueryClient();
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
 
   const ownReviewQuery = useQuery({
     queryKey: ["specialist", specialistId, "my-review"],
@@ -417,7 +418,7 @@ function SpecialistReviewSection({ specialistId }: { specialistId: string }) {
   });
 
   useEffect(() => {
-    if (ownReviewQuery.data && ownReviewQuery.data.status !== "APPROVED") {
+    if (ownReviewQuery.data) {
       reset({
         rating: ownReviewQuery.data.rating,
         comment: ownReviewQuery.data.comment,
@@ -430,7 +431,13 @@ function SpecialistReviewSection({ specialistId }: { specialistId: string }) {
     onSuccess: async (data) => {
       setError(null);
       setMessage(data.message ?? "Відгук надіслано на модерацію.");
-      await queryClient.invalidateQueries({ queryKey: ["specialist", specialistId, "my-review"] });
+      setEditing(false);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["specialist", specialistId] }),
+        queryClient.invalidateQueries({ queryKey: ["patient", "reviews"] }),
+        queryClient.invalidateQueries({ queryKey: ["specialists"] }),
+        queryClient.invalidateQueries({ queryKey: ["home", "specialists"] }),
+      ]);
     },
     onError: (err) => {
       setMessage(null);
@@ -452,18 +459,27 @@ function SpecialistReviewSection({ specialistId }: { specialistId: string }) {
   }
 
   const own = ownReviewQuery.data;
-  if (own?.status === "PENDING") {
+  if (ownReviewQuery.isPending) return <p className="mt-3 text-sm text-text-muted">Завантаження вашого відгуку…</p>;
+  if (ownReviewQuery.isError) return (
+    <div role="alert" className="mt-3 text-sm text-red-700">
+      <p>Не вдалося завантажити ваш відгук.</p>
+      <button type="button" className="underline" onClick={() => ownReviewQuery.refetch()}>Спробувати ще раз</button>
+    </div>
+  );
+  if (own?.status === "PENDING" && !editing) {
     return (
       <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
         Ваш відгук очікує модерації. Після схвалення він зʼявиться в списку нижче.
+        <button type="button" className="mt-2 block underline" onClick={() => setEditing(true)}>Редагувати відгук</button>
       </p>
     );
   }
 
-  if (own?.status === "APPROVED") {
+  if (own?.status === "APPROVED" && !editing) {
     return (
       <p className="mt-3 rounded-lg border border-border bg-surface-tint px-3 py-2 text-sm text-text-muted">
-        Ви вже залишили схвалений відгук про цього спеціаліста. Повторний відгук недоступний.
+        Ваш відгук опубліковано. Після редагування він повторно пройде модерацію.
+        <button type="button" className="mt-2 block text-brand-600 underline" onClick={() => setEditing(true)}>Редагувати відгук</button>
       </p>
     );
   }
@@ -474,7 +490,8 @@ function SpecialistReviewSection({ specialistId }: { specialistId: string }) {
       onSubmit={handleSubmit((values) => mutation.mutate(values))}
       noValidate
     >
-      <h3 className="text-sm font-semibold text-text">Залишити відгук</h3>
+      <h3 className="text-sm font-semibold text-text">{own ? "Редагувати відгук" : "Залишити відгук"}</h3>
+      {own?.status === "APPROVED" && <p className="text-sm text-text-muted">Після збереження відгук і його оцінка будуть приховані до повторного схвалення.</p>}
       {message && <p className="text-sm text-success">{message}</p>}
       {error && <p className="text-sm text-red-700">{error}</p>}
       <div>
@@ -498,6 +515,7 @@ function SpecialistReviewSection({ specialistId }: { specialistId: string }) {
       >
         {mutation.isPending ? "Надсилання…" : own ? "Оновити відгук" : "Надіслати відгук"}
       </button>
+      {editing && <button type="button" className="ml-3 text-sm underline" onClick={() => { reset({ rating: own!.rating, comment: own!.comment }); setEditing(false); }}>Скасувати редагування</button>}
     </form>
   );
 }

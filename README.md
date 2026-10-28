@@ -4,7 +4,7 @@
 
 **Стек:** React (Vite) + TypeScript · Express + TypeScript · PostgreSQL · Prisma.
 
-Прогрес етапів: `docs/IMPLEMENTATION-STATUS.md` · API: `docs/api/openapi.yaml` · Магістерські матеріали: `docs/thesis/`.
+Контракт API: `docs/api/openapi.yaml`. Дипломні матеріали, плани та звіти перевірок зберігаються локально й не входять у поточний checkout.
 
 ## Вимоги
 
@@ -27,6 +27,7 @@ cp .env.example .env
 
 ```bash
 npm run db:up
+npm run db:generate
 npm run db:migrate
 npm run db:seed
 npm run dev
@@ -60,6 +61,28 @@ npm run dev
 - **Admin** створюється seed (`SEED_ADMIN_EMAIL` у `.env`). Пароль **не** зберігайте в репозиторії та не вставляйте в README.
 - **PATIENT / SPECIALIST** — реєстрація через UI (`/register`).
 - Демо-спеціалісти з seed — вигадані профілі з позначкою demo.
+- У showcase всі 48 портретів `sc-001`–`sc-048` — фотореалістичні AI-зображення вигаданих дорослих людей (512×512 WebP). Походження, промпти, імена та контрольні суми — у `fixtures/showcase/portrait-manifest.json`. Це синтетичні профілі, не реальний каталог лікарів.
+- `npm run showcase:portraits` створює лише відсутні заглушки й зберігає наявні портрети.
+
+## Презентаційний набір із 48 профілями
+
+```bash
+cp .env.showcase.example .env.showcase
+```
+
+Налаштуйте `SHOWCASE_DATABASE_URL` і `DATABASE_URL` на базу **`rehabmatch_showcase`**; також задайте `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD` і `SHOWCASE_SEED_PASSWORD`. Паролі мають залишатись у локальних env-файлах.
+
+```bash
+npm run db:up
+npm run showcase:prepare
+npm run showcase:seed
+npm run showcase:verify
+npm run dev:showcase
+```
+
+Frontend: `http://localhost:5184`, API: `http://localhost:3021`. Портрети вже включені в репозиторій; повторно генерувати їх не потрібно. Seed зв'язує їх зі стабільними профілями `sc-001`–`sc-048`.
+
+Вхід пацієнта: `showcase.patient-01@example.test`; спеціаліста: `specialist.sc-001@example.test`. Для обох пароль береться з `SHOWCASE_SEED_PASSWORD`; адміністратор — із `SEED_ADMIN_*`.
 
 ## Тестування
 
@@ -67,21 +90,18 @@ npm run dev
 2. E2E: `cp .env.e2e.example .env.e2e`, налаштуйте `E2E_DATABASE_URL` → **`rehabmatch_e2e`** (не `rehabmatch`).
 3. `npm run e2e` — global setup створить БД (за потреби), migrate, seed; API з `REHABMATCH_E2E=1` (auth quota для тестів; production ліміт не змінюється).
 4. Демо вручну: `npm run dev` + БД **`rehabmatch`** — E2E її не очищає.
-5. Деталі: `docs/thesis/E2E-ENVIRONMENT.md`, audit: `docs/thesis/DEPENDENCY-AUDIT.md`.
+5. E2E використовує порти `5174`/`3011` за прикладом env. Не направляйте тестові мутації на презентаційну БД; `npm run e2e:showcase` призначена для перегляду й smoke-перевірок showcase.
 
 ## Типові проблеми (Windows)
 
 - **Prisma EPERM on generate** — зупиніть `npm run dev`, повторіть `npm run db:generate`.
-- **E2E 404 на API** — переконайтесь, що API слухає `3001`, client `5173`.
+- **E2E 404 на API** — звірте порти з `.env.e2e` (за замовчуванням API `3011`, client `5174`).
 - **Docker** — перевірте `docker ps`, порт 5432 вільний.
 
 ## Обмеження MVP
 
 Немає OAuth, платежів, eHealth, LLM, повноцінного календаря, email/SMS. Заявка на консультацію — лише статусний workflow. Рекомендації не перераховуються задним числом при зміні рейтингу.
 
-## Документація
+## Що зберігається в Git
 
-- `docs/01-PRODUCT-REQUIREMENTS.md` — вимоги
-- `docs/06-API-CONTRACT.md` — контракт REST
-- `docs/api/openapi.yaml` — OpenAPI 3.0.3
-- `AGENTS.md` — правила розробки та Git author
+Код, тести, конфігурація, lock-файли, ресурси інтерфейсу, Prisma schema/міграції, seed-фікстури, цей README та контракт OpenAPI. Живі БД, дампи, секрети, uploads, дипломні документи, локальні пояснення й скриншоти звітів ігноруються. Міграції та seed потрібні для відтворюваного запуску й залишаються в репозиторії.

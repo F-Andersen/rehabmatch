@@ -9,6 +9,8 @@ import {
   createRecommendationWsm,
   createSearchRequest,
   fetchRecommendation,
+  fetchSearchRequest,
+  type SearchRequestDetail,
   loadMatchingDraft,
   previewAhpPairwise,
   previewDirectWsm,
@@ -22,12 +24,14 @@ import {
 } from "../../features/matching/criteria";
 import { matchingSearchSchema, type MatchingSearchFormValues } from "../../features/matching/schemas";
 import { ApiError } from "../../lib/api";
+import { useAuth } from "../../features/auth/AuthProvider";
 
 const inputClass =
   "w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/20";
 
 export function MatchingNewPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const catalog = useQuery({ queryKey: ["catalog"], queryFn: fetchCatalogDictionaries });
   const [error, setError] = useState<string | null>(null);
 
@@ -41,7 +45,7 @@ export function MatchingNewPage() {
     defaultValues: {
       injuryTypeId: "",
       specializationId: "",
-      cityId: "",
+      cityId: user?.cityId ?? "",
       districtId: "",
       formatId: "",
       maxBudget: 1500,
@@ -73,6 +77,7 @@ export function MatchingNewPage() {
         formatStrict: values.formatStrict,
         preferenceMode: values.preferenceMode,
       });
+      saveMatchingDraft(data.id, { mode: values.preferenceMode });
       navigate(`/matching/${data.id}/criteria`);
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Не вдалося створити запит");
@@ -111,7 +116,7 @@ export function MatchingNewPage() {
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label className="mb-1 block text-sm font-medium">Місто</label>
-            <select className={inputClass} {...register("cityId")}>
+            <select className={inputClass} {...register("cityId")} value={cityId}>
               <option value="">Не вказано</option>
               {catalog.data?.cities.map((item) => (
                 <option key={item.id} value={item.id}>{item.name}</option>
@@ -181,27 +186,47 @@ function comparisonKey(a: CriterionKey, b: CriterionKey) {
 
 export function MatchingCriteriaPage() {
   const { id: searchRequestId } = useParams();
+  const search = useQuery({
+    queryKey: ["search-request", searchRequestId],
+    queryFn: () => fetchSearchRequest(searchRequestId!),
+    enabled: Boolean(searchRequestId),
+  });
+  if (!searchRequestId) return <p className="p-8">Невідомий ідентифікатор запиту.</p>;
+  if (search.isPending) return <p className="p-8">Завантаження параметрів підбору…</p>;
+  if (search.isError) return (
+    <div className="p-8" role="alert">
+      <p>Не вдалося завантажити параметри підбору.</p>
+      <button type="button" onClick={() => search.refetch()}>Спробувати ще раз</button>
+    </div>
+  );
+  return <MatchingCriteriaForm key={searchRequestId} search={search.data} />;
+}
+
+function MatchingCriteriaForm({ search }: { search: SearchRequestDetail }) {
+  const searchRequestId = search.id;
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"AHP_PAIRWISE" | "DIRECT_WSM">("AHP_PAIRWISE");
+  const [draft] = useState(() => loadMatchingDraft(searchRequestId));
+  const [mode, setMode] = useState<"AHP_PAIRWISE" | "DIRECT_WSM">(() =>
+    draft?.mode === "AHP_PAIRWISE" || draft?.mode === "DIRECT_WSM"
+      ? draft.mode : search.preferenceMode,
+  );
   const [stepIndex, setStepIndex] = useState(0);
-  const [comparisons, setComparisons] = useState<ComparisonMap>({});
-  const [priorities, setPriorities] = useState<Record<CriterionKey, number>>({
+  const [comparisons, setComparisons] = useState<ComparisonMap>(() => (draft?.comparisons as ComparisonMap) ?? {});
+  const [priorities, setPriorities] = useState<Record<CriterionKey, number>>(() => ({
     EXPERIENCE: 5,
     PRICE: 5,
     RATING: 5,
     LOCATION: 5,
     FORMAT: 5,
-  });
+    ...(draft?.priorities as Partial<Record<CriterionKey, number>>),
+  }));
   const [preview, setPreview] = useState<Awaited<ReturnType<typeof previewAhpPairwise>> | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!searchRequestId) return;
-    const draft = loadMatchingDraft(searchRequestId);
-    if (draft?.comparisons) setComparisons(draft.comparisons as ComparisonMap);
-    if (draft?.priorities) setPriorities(draft.priorities as Record<CriterionKey, number>);
-    if (draft?.mode) setMode(draft.mode as "AHP_PAIRWISE" | "DIRECT_WSM");
-  }, [searchRequestId]);
+    setPreview(null);
+    setError(null);
+  }, [mode, comparisons, priorities]);
 
   useEffect(() => {
     if (!searchRequestId) return;
@@ -241,9 +266,16 @@ export function MatchingCriteriaPage() {
       if (!searchRequestId) throw new Error("Невідомий запит");
       if (mode === "AHP_PAIRWISE") {
         if (!preview?.isConsistent) throw new ApiError(422, "Порівняння суперечливі", "AHP_INCONSISTENT");
-        return createRecommendationAhp(searchRequestId, comparisonsList);
       }
-      return createRecommendationWsm(searchRequestId, priorities);
+      // A changed mode needs its own persisted request; the original keeps its history.
+      const target = mode === search.preferenceMode ? search : await createSearchRequest({
+        ...search.filtersSnapshot,
+        specializationId: search.filtersSnapshot.specializationId ?? undefined,
+        preferenceMode: mode,
+      });
+      return mode === "AHP_PAIRWISE"
+        ? createRecommendationAhp(target.id, comparisonsList)
+        : createRecommendationWsm(target.id, priorities);
     },
     onSuccess: (data) => navigate(`/recommendations/${data.id}`),
     onError: (e) => setError(e instanceof ApiError ? e.message : "Не вдалося зберегти рекомендацію"),
@@ -332,7 +364,8 @@ export function MatchingCriteriaPage() {
           className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
           disabled={
             submitMutation.isPending ||
-            (mode === "AHP_PAIRWISE" && Boolean(preview && !preview.isConsistent))
+            previewMutation.isPending ||
+            (mode === "AHP_PAIRWISE" && !preview?.isConsistent)
           }
           onClick={() => submitMutation.mutate()}
         >

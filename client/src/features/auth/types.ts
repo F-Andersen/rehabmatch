@@ -7,6 +7,7 @@ export type PublicUser = {
   phone: string | null;
   role: UserRole;
   patientId: string | null;
+  cityId: string | null;
   specialistId: string | null;
   specialistVerificationStatus: string | null;
 };

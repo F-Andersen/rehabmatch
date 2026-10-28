@@ -9,6 +9,7 @@ const adminLinks = [
   { to: "/admin/requests", label: "Заявки" },
   { to: "/admin/dictionaries", label: "Довідники" },
   { to: "/admin/criteria", label: "Критерії" },
+  { to: "/settings", label: "Налаштування" },
 ];
 
 function linkClass({ isActive }: { isActive: boolean }) {

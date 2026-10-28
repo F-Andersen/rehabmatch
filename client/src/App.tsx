@@ -4,6 +4,7 @@ import { AppLayout } from "./components/AppLayout";
 import { PatientLayout } from "./components/PatientLayout";
 import { SpecialistLayout } from "./components/SpecialistLayout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { useAuth } from "./features/auth/AuthProvider";
 import {
   AdminCriteriaPage,
   AdminDictionariesPage,
@@ -38,6 +39,13 @@ import {
 } from "./pages/SpecialistPortalPages";
 import { SpecialistDetailPage, SpecialistsListPage } from "./pages/SpecialistsPages";
 
+function SettingsLayout() {
+  const { user } = useAuth();
+  if (user?.role === "PATIENT") return <PatientLayout />;
+  if (user?.role === "SPECIALIST") return <SpecialistLayout />;
+  return <AdminLayout />;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -64,7 +72,6 @@ export default function App() {
             <Route path="recommendations" element={<RecommendationsHistoryPage />} />
             <Route path="my-requests" element={<MyRequestsPage />} />
             <Route path="my-reviews" element={<MyReviewsPage />} />
-            <Route path="settings" element={<SettingsPage />} />
           </Route>
           <Route
             path="matching/new"
@@ -101,11 +108,13 @@ export default function App() {
           <Route
             path="settings"
             element={
-              <ProtectedRoute roles={["SPECIALIST", "ADMIN"]}>
-                <SettingsPage />
+              <ProtectedRoute roles={["PATIENT", "SPECIALIST", "ADMIN"]}>
+                <SettingsLayout />
               </ProtectedRoute>
             }
-          />
+          >
+            <Route index element={<SettingsPage />} />
+          </Route>
 
           <Route
             element={

@@ -32,6 +32,7 @@ export async function logoutRequest(): Promise<void> {
 }
 
 export async function updateMeRequest(payload: {
+  cityId?: string | null;
   fullName?: string;
   phone?: string | null;
 }): Promise<PublicUser> {

@@ -1,8 +1,10 @@
 /**
- * Generates 48 unique illustrative portrait WebPs for showcase specialists.
- * Synthetic artwork (not photographs of real people). See fixtures/showcase/IMAGE-ATTRIBUTION.md
+ * Fills missing showcase portraits with synthetic SVG placeholders.
+ * Existing portraits (including ImageGen artwork) and provenance are preserved.
+ * See fixtures/showcase/IMAGE-ATTRIBUTION.md and portrait-manifest.json.
  */
 import { mkdir, writeFile } from "node:fs/promises";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
@@ -43,22 +45,35 @@ function portraitSvg(index: number): string {
 
 async function main(): Promise<void> {
   await mkdir(outDir, { recursive: true });
-  const manifest: Array<{ file: string; slug: string }> = [];
+  type Portrait = { file: string; slug: string; source?: string; prompt?: string };
+  const manifestPath = path.join(repoRoot, "fixtures/showcase/portrait-manifest.json");
+  const previous: { portraits: Portrait[] } = existsSync(manifestPath)
+    ? JSON.parse(readFileSync(manifestPath, "utf8")) : { portraits: [] };
+  const known = new Map(previous.portraits.map((portrait) => [portrait.slug, portrait]));
+  const manifest: Portrait[] = [];
+  let generated = 0;
 
   for (let i = 1; i <= 48; i += 1) {
     const slug = `sc-${String(i).padStart(3, "0")}`;
     const fileName = `${slug}.webp`;
-    const svg = portraitSvg(i);
-    const webp = await sharp(Buffer.from(svg)).resize(512, 512).webp({ quality: 82 }).toBuffer();
-    await writeFile(path.join(outDir, fileName), webp);
-    manifest.push({ file: `/images/specialists/${fileName}`, slug });
+    const filePath = path.join(outDir, fileName);
+    const entry: Portrait = { ...known.get(slug), file: `/images/specialists/${fileName}`, slug };
+    if (!existsSync(filePath)) {
+      const svg = portraitSvg(i);
+      const webp = await sharp(Buffer.from(svg)).resize(512, 512).webp({ quality: 82 }).toBuffer();
+      await writeFile(filePath, webp);
+      entry.source = "svg-placeholder";
+      delete entry.prompt;
+      generated += 1;
+    }
+    manifest.push(entry);
   }
 
   await writeFile(
-    path.join(repoRoot, "fixtures/showcase/portrait-manifest.json"),
+    manifestPath,
     JSON.stringify({ generatedAt: new Date().toISOString(), portraits: manifest }, null, 2),
   );
-  console.log(`Generated ${manifest.length} portraits in ${outDir}`);
+  console.log(`Generated ${generated} missing placeholders; preserved ${manifest.length - generated} existing portraits in ${outDir}`);
 }
 
 main().catch((error) => {

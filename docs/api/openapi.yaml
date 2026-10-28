@@ -228,6 +228,8 @@ paths:
           $ref: "#/components/responses/ValidationError"
         "401":
           $ref: "#/components/responses/UnauthenticatedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
 
   /api/v1/patient/me:
     get:
@@ -335,7 +337,7 @@ paths:
     post:
       tags: [Reviews]
       summary: Create or update review (moderation queue)
-      description: RBAC — PATIENT role only. Upsert sets status PENDING.
+      description: RBAC — PATIENT role only. Upsert preserves one review per patient/specialist and sets status PENDING, including edits of approved reviews. Edited reviews stop contributing to the public rating until approved again.
       operationId: upsertSpecialistReview
       security:
         - rehabmatchSession: []
@@ -1513,6 +1515,14 @@ components:
         email:
           type: string
           format: email
+        phone:
+          type: string
+          nullable: true
+        cityId:
+          type: string
+          format: uuid
+          nullable: true
+          description: Patient profile city; null for other roles.
         role:
           $ref: "#/components/schemas/UserRole"
         patientId:
@@ -1589,6 +1599,11 @@ components:
     UpdateMeRequest:
       type: object
       properties:
+        cityId:
+          type: string
+          format: uuid
+          nullable: true
+          description: Patient role only. Null clears the saved city.
         fullName:
           type: string
           minLength: 2
@@ -1597,6 +1612,7 @@ components:
           type: string
           maxLength: 32
           nullable: true
+          description: Empty or null clears the phone. Otherwise 10–15 digits with optional leading plus, spaces, parentheses or hyphens; normalized before saving.
 
     IdName:
       type: object

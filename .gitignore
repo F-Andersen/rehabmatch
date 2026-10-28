@@ -16,5 +16,45 @@ playwright-report/
 *.log
 .DS_Store
 .idea/
-# Academic source documents and screenshot references are intentionally included
-# in the handoff; review privacy before pushing to a public Git repository.
+# Local documentation, academic sources, plans and explanatory material.
+# Keep README files and the executable API contract.
+*.md
+!README.md
+!**/README.md
+/docs/*
+!/docs/api/
+/docs/api/*
+!/docs/api/openapi.yaml
+/design/reference/
+/reference/
+/prompts/
+*.doc
+*.docx
+*.pdf
+*.ppt
+*.pptx
+
+# Database contents/backups are local. Prisma schema, migrations and seed
+# source/fixtures remain versioned so a clean checkout can recreate the DB.
+*.db
+*.db-*
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+*.dump
+*.backup
+*.sql
+!server/prisma/migrations/**/*.sql
+*.sql.gz
+*.sql.zip
+/backups/
+/database-backups/
+/data/
+/pgdata/
+/postgres-data/
+/server/prisma/*.sql
+
+# User uploads and manual QA artifacts are generated local content.
+/client/public/images/uploads/
+/qa-artifacts/

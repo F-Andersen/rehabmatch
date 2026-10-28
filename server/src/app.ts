@@ -29,6 +29,8 @@ export function createApp() {
       credentials: true,
     }),
   );
+  // Base64 adds about one third to a 2 MiB image. Keep other JSON routes at 100 KiB.
+  app.use("/api/v1/specialist/me/photo", express.json({ limit: "3mb" }));
   app.use(express.json());
   app.use(cookieParser());
   app.use(csrfOriginCheck);

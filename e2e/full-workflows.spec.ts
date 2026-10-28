@@ -199,4 +199,32 @@ test("review pending then admin approval updates public rating", async ({ page, 
   const publicReviews = await request.get(`${apiBase()}/specialists/${specRow.id}/reviews`);
   const body = await publicReviews.json();
   expect(body.data.length).toBeGreaterThan(0);
+
+  await page.goto(`/specialists/${specRow.id}`);
+  await page.getByRole("button", { name: "Редагувати відгук", exact: true }).click();
+  await expect(page.getByLabel("Коментар", { exact: true })).toHaveValue("E2E review for thesis demo");
+  await page.getByLabel("Оцінка", { exact: true }).selectOption("2");
+  await page.getByLabel("Коментар", { exact: true }).fill("E2E updated review after publication");
+  await page.getByRole("button", { name: "Оновити відгук", exact: true }).click();
+  await expect(page.getByText(/Ваш відгук очікує модерації/)).toBeVisible();
+  await page.reload();
+  await expect(page.getByText(/Ваш відгук очікує модерації/)).toBeVisible();
+  const hidden = await request.get(`${apiBase()}/specialists/${specRow.id}/reviews`);
+  expect((await hidden.json()).data).toHaveLength(0);
+  const noRating = (await (await request.get(`${apiBase()}/specialists/${specRow.id}`)).json()).data;
+  expect(noRating.ratingCount).toBe(0);
+  const ownReview = (await (await page.request.get(`${apiBase()}/specialists/${specRow.id}/reviews/mine`)).json()).data;
+  expect(ownReview.id).toBe(reviewRow.id);
+  expect(ownReview.rating).toBe(2);
+
+  const reapprove = await request.patch(`${apiBase()}/admin/reviews/${reviewRow.id}/status`, {
+    data: { status: "APPROVED" }, headers: { Origin: clientOrigin() },
+  });
+  expect(reapprove.status()).toBe(200);
+  const published = (await (await request.get(`${apiBase()}/specialists/${specRow.id}/reviews`)).json()).data;
+  expect(published).toHaveLength(1);
+  expect(published[0].comment).toBe("E2E updated review after publication");
+  const updatedRating = (await (await request.get(`${apiBase()}/specialists/${specRow.id}`)).json()).data;
+  expect(updatedRating.ratingCount).toBe(1);
+  expect(updatedRating.ratingAvg).toBe(2);
 });

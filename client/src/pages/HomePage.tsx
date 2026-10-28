@@ -193,6 +193,13 @@ export function HomePage() {
         </div>
         {specialistsQuery.isLoading ? (
           <p className="mt-6 text-text-muted">Завантаження профілів…</p>
+        ) : specialistsQuery.isError ? (
+          <div role="alert" className="mt-6 rounded-lg bg-red-50 p-4 text-sm text-red-800">
+            <p>Не вдалося завантажити спеціалістів. Спробуйте ще раз.</p>
+            <button type="button" className="mt-2 underline" disabled={specialistsQuery.isFetching} onClick={() => specialistsQuery.refetch()}>
+              Повторити завантаження
+            </button>
+          </div>
         ) : featured.length === 0 ? (
           <p className="mt-6 text-text-muted">Поки немає опублікованих спеціалістів у каталозі.</p>
         ) : (

@@ -1,197 +1,437 @@
 {
-  "generatedAt": "2026-10-17T22:24:42.248Z",
+  "generatedAt": "2026-10-28T22:25:12.035Z",
   "portraits": [
     {
       "file": "/images/specialists/sc-001.webp",
-      "slug": "sc-001"
+      "slug": "sc-001",
+      "source": "builtin-imagegen",
+      "fullName": "Олександр Ковальчук",
+      "generatedAt": "2026-10-27",
+      "prompt": "Professional square headshot photograph for a fictional adult rehabilitation specialist in a Ukrainian educational demo website. Entirely invented man aged 30, short dark brown hair, clean-shaven, kind natural face, wearing a plain muted teal polo without logos. Head and shoulders, centered face, looking toward camera, relaxed smile, soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Natural editorial photography. No glamour retouching, text, logos, badges or stethoscope. Entirely fictional person, no known real person. One portrait, no grid.",
+      "sha256": "807cf09fbf2fcdf4fbc849799cc52f7dce6a5690bf1a1e5174e71eec551ac225"
     },
     {
       "file": "/images/specialists/sc-002.webp",
-      "slug": "sc-002"
+      "slug": "sc-002",
+      "source": "builtin-imagegen",
+      "fullName": "Марія Шевченко",
+      "generatedAt": "2026-10-27",
+      "prompt": "Professional square headshot photograph for a fictional adult rehabilitation specialist in a Ukrainian educational demo website. Entirely invented woman aged 33, shoulder-length chestnut hair tucked behind one ear, friendly natural face, plain soft blue professional blouse without logos. Head and shoulders, centered face, looking toward camera, relaxed smile, soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Natural editorial photography. No glamour retouching, text, logos, badges or stethoscope. Entirely fictional person, no known real person. One portrait, no grid.",
+      "sha256": "95eb4bf0f110869c16d12bf0f93311a593cab2a15f53546355488c3f3510a605"
     },
     {
       "file": "/images/specialists/sc-003.webp",
-      "slug": "sc-003"
+      "slug": "sc-003",
+      "source": "builtin-imagegen",
+      "fullName": "Андрій Бондаренко",
+      "generatedAt": "2026-10-27",
+      "prompt": "Professional square headshot photograph for a fictional adult rehabilitation specialist in a Ukrainian educational demo website. Entirely invented man aged 43, slightly receding short salt-and-pepper brown hair, neat short beard, natural approachable face, wearing a plain muted navy polo without logos. Head and shoulders, centered face, looking toward camera, relaxed smile, soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Natural editorial photography. No glamour retouching, text, logos, badges or stethoscope. Entirely fictional person, no known real person. One portrait, no grid.",
+      "sha256": "18faea0feb3b53b6962098d3e3dc7404c78ec193ba24af8cdcdd4677e3d046b1"
     },
     {
       "file": "/images/specialists/sc-004.webp",
-      "slug": "sc-004"
+      "slug": "sc-004",
+      "source": "builtin-imagegen",
+      "fullName": "Олена Мельник",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: woman age 44, dark blond straight bob, hazel eyes, pale sage blouse. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Олена Мельник, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "07842d544b9075f531a775c5fbdeb06a98f3d6fd25d1cb7b169af4354d933ccd"
     },
     {
       "file": "/images/specialists/sc-005.webp",
-      "slug": "sc-005"
+      "slug": "sc-005",
+      "source": "builtin-imagegen",
+      "fullName": "Сергій Ткаченко",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: man age 34, curly dark brown hair, light stubble, teal polo. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Сергій Ткаченко, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "2ec1cef1cb94466c771625dd36ca4ad4bffc06658c9c43ff49d07dff017cfbd4"
     },
     {
       "file": "/images/specialists/sc-006.webp",
-      "slug": "sc-006"
+      "slug": "sc-006",
+      "source": "builtin-imagegen",
+      "fullName": "Наталія Кравченко",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: woman age 45, auburn shoulder-length waves, subtle smile lines, navy blouse. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Наталія Кравченко, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "72336288bd1b20f538b5be06f205d0b7b7cf9273aa8a07b0fa384cddd18e91fa"
     },
     {
       "file": "/images/specialists/sc-007.webp",
-      "slug": "sc-007"
+      "slug": "sc-007",
+      "source": "builtin-imagegen",
+      "fullName": "Ірина Лисенко",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: woman age 43, dark brown hair in loose low bun, light blue blouse. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Ірина Лисенко, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "f4fdfa6643b12c608260a79488b9543d7702621306040a2cf0c60204fcdbc0be"
     },
     {
       "file": "/images/specialists/sc-008.webp",
-      "slug": "sc-008"
+      "slug": "sc-008",
+      "source": "builtin-imagegen",
+      "fullName": "Павло Романенко",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: man age 50, short graying hair, clean-shaven, silver rectangular glasses, muted gray-green polo. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Павло Романенко, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "833e44f7e79e52ef57c16d6ce5011fcd6f72adfb73931ac0b0eb81a39a34bdcd"
     },
     {
       "file": "/images/specialists/sc-009.webp",
-      "slug": "sc-009"
+      "slug": "sc-009",
+      "source": "builtin-imagegen",
+      "fullName": "Вікторія Гончар",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: woman age 36, shoulder-length blond hair, blue eyes, teal blouse. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Вікторія Гончар, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "8adf465ea2616e8753271518f1768bab277370a5e63fd8f9a1f8a225413d7a72"
     },
     {
       "file": "/images/specialists/sc-010.webp",
-      "slug": "sc-010"
+      "slug": "sc-010",
+      "source": "builtin-imagegen",
+      "fullName": "Дмитро Савченко",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: man age 42, close-cropped black hair, neat beard, blue polo. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Дмитро Савченко, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "f8497f4d95de73faa83cedecc92b85dae7da9224c1c43b2c3c0e3b1d7aaab4c6"
     },
     {
       "file": "/images/specialists/sc-011.webp",
-      "slug": "sc-011"
+      "slug": "sc-011",
+      "source": "builtin-imagegen",
+      "fullName": "Юлія Марченко",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: woman age 40, short brown pixie haircut, brown eyes, muted sage blouse. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Юлія Марченко, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "13ad533ff4390bfcc738c09f7416b646fefd904bebddf901f288cb5f3fcfc67b"
     },
     {
       "file": "/images/specialists/sc-012.webp",
-      "slug": "sc-012"
+      "slug": "sc-012",
+      "source": "builtin-imagegen",
+      "fullName": "Роман Поліщук",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: man age 47, sandy brown hair with gray temples, clean-shaven, navy polo. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Роман Поліщук, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "21c2ebc51a33d8db85a25f62a73ec18f273cc032c6aea30ab66a79a73a6bccb6"
     },
     {
       "file": "/images/specialists/sc-013.webp",
-      "slug": "sc-013"
+      "slug": "sc-013",
+      "source": "builtin-imagegen",
+      "fullName": "Анастасія Білоус",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: woman age 38, long dark straight hair, warm brown eyes, pale blue blouse. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Анастасія Білоус, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "a1366087f225a21e74c597e362cae498dd2cc11c6d034b671215d7f548447b58"
     },
     {
       "file": "/images/specialists/sc-014.webp",
-      "slug": "sc-014"
+      "slug": "sc-014",
+      "source": "builtin-imagegen",
+      "fullName": "Максим Захарченко",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: man age 45, wavy chestnut hair, light beard, muted teal polo. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Максим Захарченко, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "eb441563e84ca8d5d6931b838a2f98d087c317ef042ee408526ca01a276522c4"
     },
     {
       "file": "/images/specialists/sc-015.webp",
-      "slug": "sc-015"
+      "slug": "sc-015",
+      "source": "builtin-imagegen",
+      "fullName": "Катерина Олійник",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: woman age 46, medium blond bob, fine smile lines, muted blue blouse. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Катерина Олійник, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "1b73a27e23c8121a6e29f4ce335b5079bb01be04baae06015dd99ffb0541112f"
     },
     {
       "file": "/images/specialists/sc-016.webp",
-      "slug": "sc-016"
+      "slug": "sc-016",
+      "source": "builtin-imagegen",
+      "fullName": "Ігор Петренко",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: man age 53, thinning salt-and-pepper hair, clean-shaven, olive polo. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Ігор Петренко, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "07ae5983804428016f2f9526cee8cf466ecb5a5fb394d938aadc5e5921779e97"
     },
     {
       "file": "/images/specialists/sc-017.webp",
-      "slug": "sc-017"
+      "slug": "sc-017",
+      "source": "builtin-imagegen",
+      "fullName": "Софія Кузьменко",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: woman age 43, dark brown shoulder-length curls, pale sage blouse. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Софія Кузьменко, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "5aefc28e116fb8ce4aeae6b708ef1ba482a64d390b0d500736410da06ecb501c"
     },
     {
       "file": "/images/specialists/sc-018.webp",
-      "slug": "sc-018"
+      "slug": "sc-018",
+      "source": "builtin-imagegen",
+      "fullName": "Володимир Іваненко",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: man age 32, short blond hair, clean-shaven, blue polo. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Володимир Іваненко, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "43a5c88bf07ba741a565b579723cb1894e62149a2241ede5fe9911326106d9a6"
     },
     {
       "file": "/images/specialists/sc-019.webp",
-      "slug": "sc-019"
+      "slug": "sc-019",
+      "source": "builtin-imagegen",
+      "fullName": "Ганна Сидоренко",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: woman age 41, chestnut hair pulled back, thin round glasses, teal blouse. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Ганна Сидоренко, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "f4dbbef1195f1ea7a261d997ec94a33fd3cf7d1e6378972331efc8eac6630c5c"
     },
     {
       "file": "/images/specialists/sc-020.webp",
-      "slug": "sc-020"
+      "slug": "sc-020",
+      "source": "builtin-imagegen",
+      "fullName": "Тарас Мороз",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: man age 47, dark hair with silver temples, short beard, navy polo. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Тарас Мороз, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "dcc25ef58d177b18ee0ca0dc8ca3551af56795873fa183a6dbc931947cfc4d3e"
     },
     {
       "file": "/images/specialists/sc-021.webp",
-      "slug": "sc-021"
+      "slug": "sc-021",
+      "source": "builtin-imagegen",
+      "fullName": "Людмила Руденко",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: woman age 55, short gray-blond hair, natural fine lines, muted blue blouse. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Людмила Руденко, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "7b0ca56282bb425c6c2576d9e5c0fd3b0e8c7f07eeab5c3b8bdd34ecf30399ca"
     },
     {
       "file": "/images/specialists/sc-022.webp",
-      "slug": "sc-022"
+      "slug": "sc-022",
+      "source": "builtin-imagegen",
+      "fullName": "Богдан Чорний",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: man age 38, straight black hair, clean-shaven, sage polo. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Богдан Чорний, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "c5117ab1eaabbe55b01bafd78df97ea0b9b0c3b3dd670029783896f8307848b6"
     },
     {
       "file": "/images/specialists/sc-023.webp",
-      "slug": "sc-023"
+      "slug": "sc-023",
+      "source": "builtin-imagegen",
+      "fullName": "Валентина Семенюк",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: woman age 47, dark auburn bob, subtle smile lines, teal blouse. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Валентина Семенюк, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "c4109ab75178d75e5c17f61baf338522f4c15f89fb1a4e4ba74b39c4984aab9c"
     },
     {
       "file": "/images/specialists/sc-024.webp",
-      "slug": "sc-024"
+      "slug": "sc-024",
+      "source": "builtin-imagegen",
+      "fullName": "Артем Левченко",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: man age 33, light brown crew cut, light stubble, muted blue polo. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Артем Левченко, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "74bf37260a15b4baa2d057223bb82492f8024def5024d534784533498b1f18fa"
     },
     {
       "file": "/images/specialists/sc-025.webp",
-      "slug": "sc-025"
+      "slug": "sc-025",
+      "source": "builtin-imagegen",
+      "fullName": "Оксана Павленко",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: woman age 44, brown shoulder-length hair, hazel eyes, sage blouse. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Оксана Павленко, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "7267eeca090ddd947085f75a6bfb6a2e28c8a4ae4281b3a679b53b881d8742e6"
     },
     {
       "file": "/images/specialists/sc-026.webp",
-      "slug": "sc-026"
+      "slug": "sc-026",
+      "source": "builtin-imagegen",
+      "fullName": "Євген Клименко",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: man age 43, short chestnut hair, neatly trimmed beard, teal polo. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Євген Клименко, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "13393766fbdccc3f47b6ffa758b1dd8ff3a58f57d4afd13174b1627f02bcc83c"
     },
     {
       "file": "/images/specialists/sc-027.webp",
-      "slug": "sc-027"
+      "slug": "sc-027",
+      "source": "builtin-imagegen",
+      "fullName": "Дарина Гриценко",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: woman age 51, dark blond bob, fine lines, navy blouse. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Дарина Гриценко, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "f1765b495567acf2dec872e18493d4a249e0df45e9711d3059485b749bf06118"
     },
     {
       "file": "/images/specialists/sc-028.webp",
-      "slug": "sc-028"
+      "slug": "sc-028",
+      "source": "builtin-imagegen",
+      "fullName": "Микола Яременко",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: man age 56, graying wavy hair, clean-shaven, muted blue polo. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Микола Яременко, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "37be447f70cf81875d834e8ed23e83c5bb30b6f809a99b3d604f9972c4544997"
     },
     {
       "file": "/images/specialists/sc-029.webp",
-      "slug": "sc-029"
+      "slug": "sc-029",
+      "source": "builtin-imagegen",
+      "fullName": "Алла Василенко",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: woman age 39, shoulder-length dark curls, warm brown eyes, teal blouse. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Алла Василенко, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "839c337d8eca1314211d73b3cdbb85e642631c367be0f1f89224298e6d6eb037"
     },
     {
       "file": "/images/specialists/sc-030.webp",
-      "slug": "sc-030"
+      "slug": "sc-030",
+      "source": "builtin-imagegen",
+      "fullName": "Станіслав Данилюк",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: man age 45, short dark brown hair, clean-shaven, rectangular glasses, sage polo. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Станіслав Данилюк, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "7739474627ffb0978f543b29fedcaa783903c1b1bfcef4f05467d8eb743c5413"
     },
     {
       "file": "/images/specialists/sc-031.webp",
-      "slug": "sc-031"
+      "slug": "sc-031",
+      "source": "builtin-imagegen",
+      "fullName": "Христина Назаренко",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: woman age 31, long auburn hair pulled back loosely, navy blouse. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Христина Назаренко, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "9be3b6b741073209b629f936fae1d5cbc44ec57e2346d6032b1a82437d4463c4"
     },
     {
       "file": "/images/specialists/sc-032.webp",
-      "slug": "sc-032"
+      "slug": "sc-032",
+      "source": "builtin-imagegen",
+      "fullName": "Віталій Корнієнко",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: man age 49, cropped brown hair with gray temples, short beard, muted teal polo. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Віталій Корнієнко, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "61603cc8066f5ff7c34a25160ab4d9fc939aa7adb4569eab430d2169fb01860b"
     },
     {
       "file": "/images/specialists/sc-033.webp",
-      "slug": "sc-033"
+      "slug": "sc-033",
+      "source": "builtin-imagegen",
+      "fullName": "Зоряна Федоренко",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: woman age 46, short dark pixie hair, hazel eyes, muted blue blouse. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Зоряна Федоренко, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "fcefa1e25f023f99ac29b61ae2599361026efd4bc0fb334472c47fe8f3d14a2f"
     },
     {
       "file": "/images/specialists/sc-034.webp",
-      "slug": "sc-034"
+      "slug": "sc-034",
+      "source": "builtin-imagegen",
+      "fullName": "Олег Бабенко",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: man age 52, short silver hair, clean-shaven, sage polo. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Олег Бабенко, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "52d753224767bcc45835b8547ca24d93a1a41fadb68241c5f34186e577012270"
     },
     {
       "file": "/images/specialists/sc-035.webp",
-      "slug": "sc-035"
+      "slug": "sc-035",
+      "source": "builtin-imagegen",
+      "fullName": "Лариса Тимошенко",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: woman age 34, straight chestnut bob, brown eyes, navy blouse. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Лариса Тимошенко, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "9e42154bbd4e9a660f72ee9e427f4baecfa70b19f6cd0cd8f17501d0461298a0"
     },
     {
       "file": "/images/specialists/sc-036.webp",
-      "slug": "sc-036"
+      "slug": "sc-036",
+      "source": "builtin-imagegen",
+      "fullName": "Назар Пономаренко",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: man age 41, medium brown wavy hair, light stubble, blue polo. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Назар Пономаренко, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "634ff1c4f115f321d8909afbf3a822d3380391c0ba7757bad402f66733f64476"
     },
     {
       "file": "/images/specialists/sc-037.webp",
-      "slug": "sc-037"
+      "slug": "sc-037",
+      "source": "builtin-imagegen",
+      "fullName": "Інна Костенко",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: woman age 51, dark brown shoulder-length hair with silver strands, sage blouse, oval face, small freckles, green eyes. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Інна Костенко, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "212d4bac982271c4e79d88021c75019516c0f4adc6fcdae6201584e01875a609"
     },
     {
       "file": "/images/specialists/sc-038.webp",
-      "slug": "sc-038"
+      "slug": "sc-038",
+      "source": "builtin-imagegen",
+      "fullName": "Петро Гуменюк",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: man age 57, short gray hair, neat short beard, teal polo, long face, prominent straight nose, deep brown eyes. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Петро Гуменюк, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "28dc2443d1ca923e634f1ff64cedbd2f7f08db99fcdf68bad299c4af9358fa77"
     },
     {
       "file": "/images/specialists/sc-039.webp",
-      "slug": "sc-039"
+      "slug": "sc-039",
+      "source": "builtin-imagegen",
+      "fullName": "Світлана Дорошенко",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: woman age 44, medium blond wavy bob, light blue blouse, rounder face, broad nose, gray eyes. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Світлана Дорошенко, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "c0e5d4743d9970c1648f2e7ef93b37d7d80d153d806a2eebc6d2cf8a6bfb0273"
     },
     {
       "file": "/images/specialists/sc-040.webp",
-      "slug": "sc-040"
+      "slug": "sc-040",
+      "source": "builtin-imagegen",
+      "fullName": "Ярослав Верещак",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: man age 43, dark blond short curls, clean-shaven, navy polo, wide face, distinct cheekbones, hazel eyes. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Ярослав Верещак, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "31297ab4c7899aea1ce8dc1af48cd3c1423ec720d2efde23b2906ab750470b02"
     },
     {
       "file": "/images/specialists/sc-041.webp",
-      "slug": "sc-041"
+      "slug": "sc-041",
+      "source": "builtin-imagegen",
+      "fullName": "Уляна Стеценко",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: woman age 32, brown hair in low ponytail, round glasses, muted teal blouse, heart-shaped face, subtle freckles, green eyes. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Уляна Стеценко, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "d5beb006e8ce6ba36492dffb991e614d71f22a49d23498f6b423efa82c76aa0e"
     },
     {
       "file": "/images/specialists/sc-042.webp",
-      "slug": "sc-042"
+      "slug": "sc-042",
+      "source": "builtin-imagegen",
+      "fullName": "Григорій Чубенко",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: man age 60, short silver hair, natural age lines, blue polo, long face, narrow nose, blue eyes. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Григорій Чубенко, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "abfc2ce18f3f3e1c199c541edfea423f093509b3217696c5c527ed6beb9b4861"
     },
     {
       "file": "/images/specialists/sc-043.webp",
-      "slug": "sc-043"
+      "slug": "sc-043",
+      "source": "builtin-imagegen",
+      "fullName": "Вероніка Литвин",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: woman age 42, dark brown wavy shoulder-length hair, sage blouse, round face, brown eyes, small freckles. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Вероніка Литвин, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "47766880201491dec8c902c59d2f8faa9a384e5006db7df0487902d04dec53a6"
     },
     {
       "file": "/images/specialists/sc-044.webp",
-      "slug": "sc-044"
+      "slug": "sc-044",
+      "source": "builtin-imagegen",
+      "fullName": "Кирило Жук",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: man age 35, short black hair, trimmed beard, teal polo, angular face, broad nose, dark eyes. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Кирило Жук, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "fba8f2e43c2665d71cd4dde632172718b076a35c46cb8c8e49b48f479e40eb69"
     },
     {
       "file": "/images/specialists/sc-045.webp",
-      "slug": "sc-045"
+      "slug": "sc-045",
+      "source": "builtin-imagegen",
+      "fullName": "Марина Хоменко",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: woman age 48, auburn layered bob, natural fine lines, light blue blouse, oval face, gray-green eyes, light smile lines. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Марина Хоменко, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "60b20c0d2e496f80e77d08032c0f203ff9d679a396c782a7412cea0e339aa8ce"
     },
     {
       "file": "/images/specialists/sc-046.webp",
-      "slug": "sc-046"
+      "slug": "sc-046",
+      "source": "builtin-imagegen",
+      "fullName": "Антон Сорока",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: man age 39, sandy brown hair, clean-shaven, rectangular glasses, sage polo, broad face, hazel eyes, pronounced chin. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Антон Сорока, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "561b36f95f9416ddf964ee78ae867a7b9d672d13e88442759607fdb16a35043d"
     },
     {
       "file": "/images/specialists/sc-047.webp",
-      "slug": "sc-047"
+      "slug": "sc-047",
+      "source": "builtin-imagegen",
+      "fullName": "Тетяна Пилипенко",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: woman age 53, short salt-and-pepper hair, navy blouse, oval face, blue eyes, natural age lines. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Тетяна Пилипенко, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "5bb794b11f51074de800a938cd44405d2981d4c460ea708b3b79fa728c0d8299"
     },
     {
       "file": "/images/specialists/sc-048.webp",
-      "slug": "sc-048"
+      "slug": "sc-048",
+      "source": "builtin-imagegen",
+      "fullName": "Василь Остапенко",
+      "generatedAt": "2026-10-28",
+      "prompt": "Photorealistic natural editorial square head-and-shoulders portrait for RehabMatch demo website. One entirely invented adult Ukrainian rehabilitation specialist: man age 58, short gray hair, neat mustache and light beard, muted teal polo, long face, gray eyes, distinct cheekbones. Centered face, full hair visible with generous margin, looking toward camera, gentle relaxed smile. Soft daylight, realistic skin texture, softly blurred warm light gray rehabilitation office background. Ordinary credible professional, no glamour retouching, no text, no logos, no badges or stethoscope. Opaque background. Fictional identity Василь Остапенко, do not resemble any known real person. One portrait, no grid.",
+      "sha256": "7cccf737094511f96759555cc1b6a5a2b04bae8d768cbb4417f383a25f4fa8ba"
     }
   ]
 }

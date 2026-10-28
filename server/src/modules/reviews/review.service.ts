@@ -31,29 +31,27 @@ export async function upsertReviewForSpecialist(
     throw new AppError(400, "VALIDATION_ERROR", "Коментар занадто короткий");
   }
 
-  const existing = await prisma.review.findUnique({
-    where: { patientId_specialistId: { patientId, specialistId } },
-  });
-  if (existing?.status === ReviewStatus.APPROVED) {
-    throw new AppError(409, "CONFLICT", "Схвалений відгук не можна змінити");
-  }
-
-  const review = await prisma.review.upsert({
-    where: {
-      patientId_specialistId: { patientId, specialistId },
-    },
-    create: {
-      patientId,
-      specialistId,
-      rating: input.rating,
-      comment,
-      status: ReviewStatus.PENDING,
-    },
-    update: {
-      rating: input.rating,
-      comment,
-      status: ReviewStatus.PENDING,
-    },
+  const review = await prisma.$transaction(async (tx) => {
+    const updated = await tx.review.upsert({
+      where: {
+        patientId_specialistId: { patientId, specialistId },
+      },
+      create: {
+        patientId,
+        specialistId,
+        rating: input.rating,
+        comment,
+        status: ReviewStatus.PENDING,
+      },
+      update: {
+        rating: input.rating,
+        comment,
+        status: ReviewStatus.PENDING,
+      },
+    });
+    // An edited review is no longer public until it is approved again.
+    await recalculateSpecialistRating(specialistId, tx);
+    return updated;
   });
 
   return {

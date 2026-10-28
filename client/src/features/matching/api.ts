@@ -22,6 +22,19 @@ export async function createSearchRequest(payload: SearchRequestPayload) {
   return res.data;
 }
 
+export type SearchRequestDetail = {
+  id: string;
+  preferenceMode: SearchRequestPayload["preferenceMode"];
+  filtersSnapshot: Omit<SearchRequestPayload, "preferenceMode" | "specializationId"> & {
+    specializationId?: string | null;
+  };
+};
+
+export async function fetchSearchRequest(id: string) {
+  const res = await apiRequest<{ data: SearchRequestDetail }>(`/api/v1/search-requests/${id}`);
+  return res.data;
+}
+
 export type AhpPreview = {
   weights: Record<CriterionKey, number>;
   lambdaMax: number | null;
@@ -145,5 +158,9 @@ export function loadMatchingDraft(searchId: string) {
 }
 
 export function saveMatchingDraft(searchId: string, data: Record<string, unknown>) {
-  sessionStorage.setItem(storageKey(searchId), JSON.stringify(data));
+  try {
+    sessionStorage.setItem(storageKey(searchId), JSON.stringify(data));
+  } catch {
+    // The persisted search remains usable when browser storage is unavailable.
+  }
 }

@@ -19,8 +19,13 @@ export const loginSchema = z.object({
 });
 
 export const updateMeSchema = z.object({
+  cityId: z.string().uuid().nullable().optional(),
   fullName: z.string().trim().min(2).max(120).optional(),
-  phone: z.string().trim().max(32).nullable().optional(),
+  phone: z.string().trim().max(32).refine((value) => {
+    const digits = value.replace(/\D/g, "");
+    return value === "" || (/^\+?[0-9 ()-]+$/.test(value) && digits.length >= 10 && digits.length <= 15);
+  }, "Вкажіть номер телефону: від 10 до 15 цифр")
+    .transform((value) => value.replace(/[ ()-]/g, "") || null).nullable().optional(),
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;

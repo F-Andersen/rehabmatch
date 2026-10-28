@@ -13,6 +13,7 @@ import {
   fetchPatientReviews,
 } from "../features/reviews-requests/api";
 import { ApiError } from "../lib/api";
+import { fetchCatalogDictionaries } from "../features/specialists/api";
 
 export {
   MatchingNewPage,
@@ -21,8 +22,12 @@ export {
 } from "./matching/MatchingFlowPages";
 
 const profileSchema = z.object({
+  cityId: z.union([z.string().uuid(), z.literal("")]),
   fullName: z.string().trim().min(2, "Мінімум 2 символи").max(120),
-  phone: z.string().trim().max(32).optional().or(z.literal("")),
+  phone: z.string().trim().max(32).refine((value) => {
+    const digits = value.replace(/\D/g, "");
+    return value === "" || (/^\+?[0-9 ()-]+$/.test(value) && digits.length >= 10 && digits.length <= 15);
+  }, "Вкажіть номер телефону: від 10 до 15 цифр").optional(),
 });
 
 function reviewStatusLabel(status: string) {
@@ -157,16 +162,19 @@ export function PatientDashboardPage() {
 
 export function PatientProfilePage() {
   const { user, refetchUser } = useAuth();
+  const catalog = useQuery({ queryKey: ["catalog"], queryFn: fetchCatalogDictionaries });
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<z.infer<typeof profileSchema>>({
     resolver: zodResolver(profileSchema),
     values: {
+      cityId: user?.cityId ?? "",
       fullName: user?.fullName ?? "",
       phone: user?.phone ?? "",
     },
@@ -175,6 +183,7 @@ export function PatientProfilePage() {
   const saveMutation = useMutation({
     mutationFn: (values: z.infer<typeof profileSchema>) =>
       updateMeRequest({
+        cityId: values.cityId || null,
         fullName: values.fullName,
         phone: values.phone?.trim() ? values.phone.trim() : null,
       }),
@@ -211,8 +220,18 @@ export function PatientProfilePage() {
         </label>
         <label className="block text-sm">
           <span className="text-text-muted">Телефон</span>
-          <input className="mt-1 w-full rounded-lg border border-border px-3 py-2" {...register("phone")} placeholder="+380…" />
+          <input type="tel" autoComplete="tel" aria-invalid={Boolean(errors.phone)} className="mt-1 w-full rounded-lg border border-border px-3 py-2" {...register("phone")} placeholder="+380…" />
+          {errors.phone && <span role="alert" className="text-xs text-red-600">{errors.phone.message}</span>}
         </label>
+        <label className="block text-sm">
+          <span className="text-text-muted">Місто</span>
+          <select className="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2" {...register("cityId")} value={watch("cityId")} disabled={!catalog.data}>
+            <option value="">Не вказано</option>
+            {catalog.data?.cities.map((city) => <option key={city.id} value={city.id}>{city.name}</option>)}
+          </select>
+          {errors.cityId && <span role="alert" className="text-xs text-red-600">Оберіть місто зі списку</span>}
+        </label>
+        {catalog.isError && <p role="alert" className="text-sm text-red-700">Не вдалося завантажити міста. <button type="button" className="underline" onClick={() => catalog.refetch()}>Повторити</button></p>}
         <button
           type="submit"
           disabled={isSubmitting || saveMutation.isPending}
@@ -388,22 +407,24 @@ export function MyRequestsPage() {
 
 export function SettingsPage() {
   const { user } = useAuth();
+  const profilePath = user?.role === "PATIENT" ? "/profile" : user?.role === "SPECIALIST" ? "/specialist/profile/edit" : null;
+  const roleLabel = user?.role === "PATIENT" ? "Пацієнт" : user?.role === "SPECIALIST" ? "Спеціаліст" : "Адміністратор";
   return (
     <section className="max-w-lg space-y-4 rounded-xl border border-border bg-surface p-6 shadow-sm">
       <h1 className="text-2xl font-semibold text-text">Налаштування облікового запису</h1>
       <p className="text-sm text-text-muted">
-        Email і пароль змінюються через адміністратора в навчальному середовищі. ПІБ і телефон — у розділі{" "}
-        <Link to="/profile" className="text-brand-600">Мій профіль</Link>.
+        Електронна пошта використовується для входу. Зміна електронної пошти та пароля в цьому прототипі поки недоступна.
       </p>
+      {profilePath && <Link to={profilePath} className="inline-block text-sm text-brand-600 underline">Редагувати мій профіль</Link>}
       {user && (
         <dl className="space-y-2 text-sm">
           <div>
             <dt className="text-text-muted">Роль</dt>
-            <dd className="font-medium text-text">{user.role}</dd>
+            <dd className="font-medium text-text">{roleLabel}</dd>
           </div>
           <div>
-            <dt className="text-text-muted">ID облікового запису</dt>
-            <dd className="font-mono text-xs text-text">{user.id}</dd>
+            <dt className="text-text-muted">Електронна пошта</dt>
+            <dd className="break-all text-text">{user.email}</dd>
           </div>
         </dl>
       )}

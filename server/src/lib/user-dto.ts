@@ -7,6 +7,7 @@ export type PublicUserDto = {
   phone: string | null;
   role: string;
   patientId: string | null;
+  cityId: string | null;
   specialistId: string | null;
   specialistVerificationStatus: string | null;
 };
@@ -19,6 +20,7 @@ export function toPublicUserDto(user: SessionUser): PublicUserDto {
     phone: user.phone ?? null,
     role: user.role,
     patientId: user.patient?.id ?? null,
+    cityId: user.patient?.cityId ?? null,
     specialistId: user.specialist?.id ?? null,
     specialistVerificationStatus: user.specialist?.verificationStatus ?? null,
   };

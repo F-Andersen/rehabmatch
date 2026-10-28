@@ -31,7 +31,9 @@ export async function saveSpecialistPhotoFromBase64(
     throw new AppError(400, "VALIDATION_ERROR", "Зображення має бути від 1 байта до 2 МБ");
   }
 
-  const meta = await sharp(buffer, { failOn: "error" }).rotate().metadata();
+  const meta = await sharp(buffer, { failOn: "error" }).rotate().metadata().catch(() => {
+    throw new AppError(400, "VALIDATION_ERROR", "Не вдалося прочитати зображення");
+  });
   if (!meta.width || !meta.height) {
     throw new AppError(400, "VALIDATION_ERROR", "Не вдалося прочитати зображення");
   }
@@ -49,7 +51,9 @@ export async function saveSpecialistPhotoFromBase64(
     throw new AppError(400, "VALIDATION_ERROR", "Недопустимий шлях файлу");
   }
 
-  const webp = await sharp(buffer).rotate().resize(768, 768, { fit: "cover" }).webp({ quality: 82 }).toBuffer();
+  const webp = await sharp(buffer).rotate().resize(768, 768, { fit: "cover" }).webp({ quality: 82 }).toBuffer().catch(() => {
+    throw new AppError(400, "VALIDATION_ERROR", "Не вдалося обробити зображення");
+  });
 
   await writeFile(resolvedOut, webp);
 
