@@ -1,0 +1,45 @@
+name: rehabmatch
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: rehabmatch
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+      POSTGRES_DB: rehabmatch_showcase
+    volumes:
+      - database:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rehabmatch -d rehabmatch_showcase"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+  api:
+    build:
+      context: .
+      target: api
+    restart: unless-stopped
+    env_file: .env.deploy
+    environment:
+      NODE_ENV: production
+      API_PORT: 3001
+      DATABASE_URL: postgresql://rehabmatch:${POSTGRES_PASSWORD}@db:5432/rehabmatch_showcase?schema=public
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - uploads:/app/client/public/images/uploads
+  web:
+    build:
+      context: .
+      target: web
+    restart: unless-stopped
+    ports:
+      - "${PUBLIC_PORT:-8083}:80"
+    depends_on:
+      - api
+    volumes:
+      - uploads:/usr/share/nginx/html/images/uploads:ro
+volumes:
+  database:
+  uploads:

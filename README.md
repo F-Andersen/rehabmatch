@@ -98,6 +98,21 @@ Frontend: `http://localhost:5184`, API: `http://localhost:3021`. Портрет�
 - **E2E 404 на API** — звірте порти з `.env.e2e` (за замовчуванням API `3011`, client `5174`).
 - **Docker** — перевірте `docker ps`, порт 5432 вільний.
 
+## Окремий демонстраційний сервер за IP
+
+`compose.deploy.yml` запускає окремі web/API/PostgreSQL та постійні volumes для БД і завантажених фото. PostgreSQL та API не публікують портів на хості. Створіть приватний `.env.deploy` з `POSTGRES_PASSWORD` (hex), `SESSION_SECRET`, `CLIENT_ORIGIN=http://IP:8083`, `PUBLIC_PORT=8083`, `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`, `SHOWCASE_SEED_PASSWORD`.
+
+```bash
+docker compose --env-file .env.deploy -f compose.deploy.yml build
+docker compose --env-file .env.deploy -f compose.deploy.yml up -d db
+docker compose --env-file .env.deploy -f compose.deploy.yml run --rm api npm run db:migrate:deploy -w server
+docker compose --env-file .env.deploy -f compose.deploy.yml run --rm api npm run showcase:seed -w server
+docker compose --env-file .env.deploy -f compose.deploy.yml up -d
+docker compose --env-file .env.deploy -f compose.deploy.yml exec -T api node --input-type=module < deploy/bootstrap-admin.mjs
+```
+
+Seed виконуйте лише для початкового наповнення окремої демонстраційної БД. Цей профіль призначений для HTTP-демонстрації з вигаданими даними: Nginx прибирає `Secure` з cookie сесії, щоб вхід працював за IP без TLS. Для HTTPS приберіть `proxy_cookie_flags ... nosecure` та оновіть `CLIENT_ORIGIN`. Секрети й резервні копії не входять у Git.
+
 ## Обмеження MVP
 
 Немає OAuth, платежів, eHealth, LLM, повноцінного календаря, email/SMS. Заявка на консультацію — лише статусний workflow. Рекомендації не перераховуються задним числом при зміні рейтингу.

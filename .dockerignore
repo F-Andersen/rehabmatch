@@ -1,0 +1,16 @@
+.git
+**/node_modules
+**/dist
+.env*
+docs
+design
+reference
+prompts
+qa-artifacts
+test-results
+playwright-report
+e2e/artifacts
+client/public/images/uploads
+*.log
+*.dump
+*.backup
