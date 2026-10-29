@@ -56,7 +56,7 @@ export function mapRecommendationResponse(
     algorithmVersion: string;
     createdAt: Date;
     weightsSnapshot: unknown;
-    searchRequest: { consistencyRatio: number | null };
+    searchRequest: { id: string; consistencyRatio: number | null; filtersSnapshot: unknown };
     items: Array<{
       rankPosition: number;
       matchScore: number;
@@ -85,6 +85,8 @@ export function mapRecommendationResponse(
       : (snapshot as Record<string, number>);
   return {
     id: recommendation.id,
+    searchRequestId: recommendation.searchRequest.id,
+    filtersSnapshot: recommendation.searchRequest.filtersSnapshot,
     mode: recommendation.method,
     algorithmVersion: recommendation.algorithmVersion,
     consistencyRatio,

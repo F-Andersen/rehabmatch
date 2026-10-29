@@ -86,6 +86,8 @@ export type RecommendationItem = {
 
 export type RecommendationDetail = {
   id: string;
+  searchRequestId: string;
+  filtersSnapshot: SearchRequestDetail["filtersSnapshot"];
   mode: string;
   algorithmVersion: string;
   consistencyRatio: number | null;

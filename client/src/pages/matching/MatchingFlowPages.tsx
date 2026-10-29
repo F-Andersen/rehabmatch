@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { fetchCatalogDictionaries } from "../../features/specialists/api";
 import {
   createRecommendationAhp,
@@ -30,6 +30,29 @@ const inputClass =
   "w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/20";
 
 export function MatchingNewPage() {
+  const [params] = useSearchParams();
+  const catalog = useQuery({ queryKey: ["catalog"], queryFn: fetchCatalogDictionaries });
+  const sourceId = params.get("from");
+  const source = useQuery({
+    queryKey: ["search-request", sourceId],
+    queryFn: () => fetchSearchRequest(sourceId!),
+    enabled: Boolean(sourceId),
+  });
+  if (catalog.isLoading || (sourceId && source.isLoading)) return <p className="p-8 text-text-muted">Завантаження параметрів…</p>;
+  if (catalog.isError) return (
+    <div className="p-8"><p role="alert">Не вдалося завантажити довідники пошуку.</p>
+      <button type="button" onClick={() => void catalog.refetch()} className="mt-4 text-brand-600 underline">Спробувати ще раз</button>
+    </div>
+  );
+  if (sourceId && !source.data) return (
+    <div className="p-8"><p role="alert">Не вдалося завантажити параметри підбору.</p>
+      <Link to="/matching/new" className="mt-4 inline-block text-brand-600 underline">Почати новий підбір</Link>
+    </div>
+  );
+  return <MatchingSearchForm key={sourceId ?? "new"} initialSearch={source.data} />;
+}
+
+function MatchingSearchForm({ initialSearch }: { initialSearch?: SearchRequestDetail }) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const catalog = useQuery({ queryKey: ["catalog"], queryFn: fetchCatalogDictionaries });
@@ -44,16 +67,16 @@ export function MatchingNewPage() {
   } = useForm<MatchingSearchFormInput, undefined, MatchingSearchFormValues>({
     resolver: zodResolver(matchingSearchSchema),
     defaultValues: {
-      injuryTypeId: "",
-      specializationId: "",
-      cityId: user?.cityId ?? "",
-      districtId: "",
-      formatId: "",
-      maxBudget: 1500,
-      cityOnly: false,
-      inclusiveOnly: false,
-      formatStrict: false,
-      preferenceMode: "AHP_PAIRWISE",
+      injuryTypeId: initialSearch?.filtersSnapshot.injuryTypeId ?? "",
+      specializationId: initialSearch?.filtersSnapshot.specializationId ?? "",
+      cityId: initialSearch ? initialSearch.filtersSnapshot.cityId ?? "" : user?.cityId ?? "",
+      districtId: initialSearch?.filtersSnapshot.districtId ?? "",
+      formatId: initialSearch?.filtersSnapshot.formatId ?? "",
+      maxBudget: initialSearch?.filtersSnapshot.maxBudget ?? 1500,
+      cityOnly: initialSearch?.filtersSnapshot.cityOnly ?? false,
+      inclusiveOnly: initialSearch?.filtersSnapshot.inclusiveOnly ?? false,
+      formatStrict: initialSearch?.filtersSnapshot.formatStrict ?? false,
+      preferenceMode: initialSearch?.preferenceMode ?? "AHP_PAIRWISE",
     },
   });
 
@@ -401,6 +424,10 @@ export function RecommendationDetailPage() {
     queryFn: () => fetchRecommendation(id!),
     enabled: Boolean(id),
   });
+  const catalog = useQuery({
+    queryKey: ["catalog"], queryFn: fetchCatalogDictionaries,
+    enabled: query.data?.items.length === 0,
+  });
 
   if (query.isLoading) return <p className="p-8 text-text-muted">Завантаження…</p>;
   if (query.isError || !query.data) {
@@ -408,6 +435,20 @@ export function RecommendationDetailPage() {
   }
 
   const rec = query.data;
+  const filters = rec.filtersSnapshot;
+  const nameOf = (rows: Array<{ id: string; name: string }> | undefined, value: string | null | undefined) =>
+    value ? rows?.find((row) => row.id === value)?.name ?? "Назва недоступна" : "Не вказано";
+  const appliedFilters = filters ? [
+    ["Тип запиту", nameOf(catalog.data?.injuryTypes, filters.injuryTypeId)],
+    ["Спеціалізація", filters.specializationId ? nameOf(catalog.data?.specializations, filters.specializationId) : "Будь-яка"],
+    ["Місто", nameOf(catalog.data?.cities, filters.cityId)],
+    ["Район", nameOf(catalog.data?.districts, filters.districtId)],
+    ["Бюджет", `До ${filters.maxBudget} грн за консультацію`],
+    ["Формат", nameOf(catalog.data?.formats, filters.formatId)],
+    ["Лише обране місто", filters.cityOnly ? "Так" : "Ні"],
+    ["Інклюзивний простір", filters.inclusiveOnly ? "Обов’язково" : "Без обмеження"],
+    ["Суворий фільтр формату", filters.formatStrict ? "Так" : "Ні"],
+  ] : [];
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
@@ -430,7 +471,19 @@ export function RecommendationDetailPage() {
       </section>
 
       {rec.items.length === 0 ? (
-        <p className="mt-8 text-center text-text-muted">За вашими фільтрами спеціалістів не знайдено.</p>
+        <section aria-labelledby="empty-results-title" className="mt-8 rounded-xl border border-border bg-surface p-5 sm:p-6">
+          <h2 id="empty-results-title" className="text-lg font-semibold">За вашими фільтрами спеціалістів не знайдено</h2>
+          <p className="mt-2 max-w-prose text-sm text-text-muted">На момент цього підбору в каталозі не було доступних профілів, які одночасно відповідали всім обов’язковим умовам. Зміна ваг критеріїв не розширить цей перелік.</p>
+          <h3 className="mt-6 text-sm font-semibold">Параметри цього підбору</h3>
+          {catalog.isLoading ? <p className="mt-2 text-sm text-text-muted">Завантаження назв параметрів…</p> : (
+            <dl className="mt-3 grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
+              {appliedFilters.map(([label, value]) => <div key={label}><dt className="text-text-muted">{label}</dt><dd className="mt-0.5 font-medium">{value}</dd></div>)}
+            </dl>
+          )}
+          <p className="mt-6 max-w-prose text-sm text-text-muted">Спробуйте прибрати обмеження спеціалізації чи міста або збільшити бюджет. Це змінить умови пошуку й не гарантує наявності збігів.</p>
+          <Link to={`/matching/new?from=${encodeURIComponent(rec.searchRequestId)}`} className="mt-4 inline-flex min-h-11 items-center rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600">Змінити параметри</Link>
+          <p className="mt-2 text-xs text-text-muted">Попередні фільтри та спосіб визначення пріоритетів будуть збережені.</p>
+        </section>
       ) : (
         <ul className="mt-8 space-y-6">
           {rec.items.map((item) => (
@@ -470,7 +523,7 @@ export function RecommendationDetailPage() {
         </ul>
       )}
 
-      <Link to="/matching/new" className="mt-8 inline-block text-sm text-brand-600">Повторити підбір</Link>
+      <Link to="/matching/new" className="mt-8 inline-block text-sm text-brand-600">{rec.items.length === 0 ? "Почати новий підбір" : "Повторити підбір"}</Link>
     </div>
   );
 }
