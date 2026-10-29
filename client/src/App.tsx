@@ -1,3 +1,4 @@
+import { lazy } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { AdminLayout } from "./components/AdminLayout";
 import { AppLayout } from "./components/AppLayout";
@@ -5,39 +6,38 @@ import { PatientLayout } from "./components/PatientLayout";
 import { SpecialistLayout } from "./components/SpecialistLayout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { useAuth } from "./features/auth/AuthProvider";
-import {
-  AdminCriteriaPage,
-  AdminDictionariesPage,
-  AdminHomePage,
-  AdminRequestsPage,
-  AdminReviewsPage,
-  AdminSpecialistsPage,
-  AdminUsersPage,
-} from "./pages/AdminPages";
-import { LoginPage } from "./pages/auth/LoginPage";
-import { RegisterPage } from "./pages/auth/RegisterPage";
+
 import { HomePage } from "./pages/HomePage";
-import {
-  MatchingCriteriaPage,
-  MatchingNewPage,
-  MatchingResultsPage,
-  MyRequestsPage,
-  MyReviewsPage,
-  PatientDashboardPage,
-  PatientProfilePage,
-  RecommendationDetailPage,
-  RecommendationsHistoryPage,
-  SettingsPage,
-} from "./pages/PatientPages";
-import { AboutPage, ContactsPage, HowItWorksPage } from "./pages/StaticPages";
-import {
-  SpecialistDashboardPage,
-  SpecialistProfileEditPage,
-  SpecialistProfileViewPage,
-  SpecialistRequestsPage,
-  SpecialistServicesPage,
-} from "./pages/SpecialistPortalPages";
-import { SpecialistDetailPage, SpecialistsListPage } from "./pages/SpecialistsPages";
+
+const AdminCriteriaPage = lazy(() => import("./pages/AdminPages").then((module) => ({ default: module.AdminCriteriaPage })));
+const AdminDictionariesPage = lazy(() => import("./pages/AdminPages").then((module) => ({ default: module.AdminDictionariesPage })));
+const AdminHomePage = lazy(() => import("./pages/AdminPages").then((module) => ({ default: module.AdminHomePage })));
+const AdminRequestsPage = lazy(() => import("./pages/AdminPages").then((module) => ({ default: module.AdminRequestsPage })));
+const AdminReviewsPage = lazy(() => import("./pages/AdminPages").then((module) => ({ default: module.AdminReviewsPage })));
+const AdminSpecialistsPage = lazy(() => import("./pages/AdminPages").then((module) => ({ default: module.AdminSpecialistsPage })));
+const AdminUsersPage = lazy(() => import("./pages/AdminPages").then((module) => ({ default: module.AdminUsersPage })));
+const LoginPage = lazy(() => import("./pages/auth/LoginPage").then((module) => ({ default: module.LoginPage })));
+const RegisterPage = lazy(() => import("./pages/auth/RegisterPage").then((module) => ({ default: module.RegisterPage })));
+const MatchingCriteriaPage = lazy(() => import("./pages/PatientPages").then((module) => ({ default: module.MatchingCriteriaPage })));
+const MatchingNewPage = lazy(() => import("./pages/PatientPages").then((module) => ({ default: module.MatchingNewPage })));
+const MatchingResultsPage = lazy(() => import("./pages/PatientPages").then((module) => ({ default: module.MatchingResultsPage })));
+const MyRequestsPage = lazy(() => import("./pages/PatientPages").then((module) => ({ default: module.MyRequestsPage })));
+const MyReviewsPage = lazy(() => import("./pages/PatientPages").then((module) => ({ default: module.MyReviewsPage })));
+const PatientDashboardPage = lazy(() => import("./pages/PatientPages").then((module) => ({ default: module.PatientDashboardPage })));
+const PatientProfilePage = lazy(() => import("./pages/PatientPages").then((module) => ({ default: module.PatientProfilePage })));
+const RecommendationDetailPage = lazy(() => import("./pages/PatientPages").then((module) => ({ default: module.RecommendationDetailPage })));
+const RecommendationsHistoryPage = lazy(() => import("./pages/PatientPages").then((module) => ({ default: module.RecommendationsHistoryPage })));
+const SettingsPage = lazy(() => import("./pages/PatientPages").then((module) => ({ default: module.SettingsPage })));
+const AboutPage = lazy(() => import("./pages/StaticPages").then((module) => ({ default: module.AboutPage })));
+const ContactsPage = lazy(() => import("./pages/StaticPages").then((module) => ({ default: module.ContactsPage })));
+const HowItWorksPage = lazy(() => import("./pages/StaticPages").then((module) => ({ default: module.HowItWorksPage })));
+const SpecialistDashboardPage = lazy(() => import("./pages/SpecialistPortalPages").then((module) => ({ default: module.SpecialistDashboardPage })));
+const SpecialistProfileEditPage = lazy(() => import("./pages/SpecialistPortalPages").then((module) => ({ default: module.SpecialistProfileEditPage })));
+const SpecialistProfileViewPage = lazy(() => import("./pages/SpecialistPortalPages").then((module) => ({ default: module.SpecialistProfileViewPage })));
+const SpecialistRequestsPage = lazy(() => import("./pages/SpecialistPortalPages").then((module) => ({ default: module.SpecialistRequestsPage })));
+const SpecialistServicesPage = lazy(() => import("./pages/SpecialistPortalPages").then((module) => ({ default: module.SpecialistServicesPage })));
+const SpecialistDetailPage = lazy(() => import("./pages/SpecialistsPages").then((module) => ({ default: module.SpecialistDetailPage })));
+const SpecialistsListPage = lazy(() => import("./pages/SpecialistsPages").then((module) => ({ default: module.SpecialistsListPage })));
 
 function SettingsLayout() {
   const { user } = useAuth();

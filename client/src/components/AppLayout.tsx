@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Link, NavLink, Outlet } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
+import { RouteContent } from "./RouteContent";
 import { useAuth } from "../features/auth/AuthProvider";
 import { dashboardPathForRole } from "../lib/role-routes";
 
@@ -134,7 +135,7 @@ export function AppLayout() {
       </header>
 
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6">
-        <Outlet />
+        <RouteContent />
       </main>
 
       <footer className="border-t border-border bg-surface">
