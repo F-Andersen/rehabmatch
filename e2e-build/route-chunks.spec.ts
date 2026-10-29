@@ -63,3 +63,11 @@ test("protected direct route still redirects a guest to login", async ({ page })
   await expect(page).toHaveURL(/\/login$/);
   await expect(page.getByRole("button", { name: "Увійти", exact: true })).toBeVisible();
 });
+
+test("a link at the bottom opens the next page at its heading", async ({ page }) => {
+  await page.goto("/contacts");
+  await page.getByRole("link", { name: "каталог спеціалістів", exact: true }).click();
+  await expect(page).toHaveURL(/\/specialists$/);
+  await expect(page.getByRole("heading", { name: "Пошук спеціалістів", exact: true })).toBeInViewport();
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+});

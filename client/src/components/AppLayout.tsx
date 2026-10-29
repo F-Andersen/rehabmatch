@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { useLayoutEffect, useState } from "react";
+import { Link, NavLink, useLocation, useNavigationType } from "react-router-dom";
 import { RouteContent } from "./RouteContent";
 import { useAuth } from "../features/auth/AuthProvider";
 import { dashboardPathForRole } from "../lib/role-routes";
@@ -27,6 +27,12 @@ function navClassName({ isActive }: { isActive: boolean }) {
 }
 
 export function AppLayout() {
+  const { pathname } = useLocation();
+  const navigationType = useNavigationType();
+  useLayoutEffect(() => {
+    // Forward links start at the page heading; let the browser restore Back/Forward.
+    if (navigationType !== "POP") window.scrollTo(0, 0);
+  }, [pathname, navigationType]);
   const { user, isLoading, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
 
