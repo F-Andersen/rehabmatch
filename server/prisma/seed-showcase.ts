@@ -18,7 +18,7 @@ import { assertSafeShowcaseDatabase } from "../src/lib/showcase-database-guard.j
 import { recalculateSpecialistRating } from "../src/modules/reviews/rating-aggregate.js";
 import { createRecommendation } from "../src/modules/recommendations/recommendation.service.js";
 import { createSearchRequest } from "../src/modules/search/search.service.js";
-import { loadShowcaseProfiles } from "./showcase/profiles.js";
+import { loadShowcaseProfiles, showcaseInjuryTypes } from "./showcase/profiles.js";
 
 const prismaDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(prismaDir, "../..");
@@ -247,7 +247,6 @@ async function seedSpecialists(
     specialistIds.push(specialist.id);
 
     const specializationId = maps.specializationByName.get(row.specialization)!;
-    const injuryTypeId = maps.injuryByName.get(row.injuryType)!;
     const formatId = maps.formatByName.get(row.appointmentFormat)!;
 
     await prisma.specialistSpecialization.upsert({
@@ -255,11 +254,14 @@ async function seedSpecialists(
       create: { specialistId: specialist.id, specializationId },
       update: {},
     });
-    await prisma.specialistInjuryType.upsert({
-      where: { specialistId_injuryTypeId: { specialistId: specialist.id, injuryTypeId } },
-      create: { specialistId: specialist.id, injuryTypeId },
-      update: {},
-    });
+    for (const name of showcaseInjuryTypes(row)) {
+      const injuryTypeId = maps.injuryByName.get(name)!;
+      await prisma.specialistInjuryType.upsert({
+        where: { specialistId_injuryTypeId: { specialistId: specialist.id, injuryTypeId } },
+        create: { specialistId: specialist.id, injuryTypeId },
+        update: {},
+      });
+    }
     await prisma.specialistAppointmentFormat.upsert({
       where: { specialistId_formatId: { specialistId: specialist.id, formatId } },
       create: { specialistId: specialist.id, formatId },

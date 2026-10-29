@@ -18,6 +18,14 @@ export type ShowcaseCsvRow = {
   verificationStatus: SpecialistStatus;
 };
 
+// The CSV's primary request does not describe every supported demo request.
+export function showcaseInjuryTypes(row: Pick<ShowcaseCsvRow, "specialization" | "injuryType">): string[] {
+  return [...new Set([
+    row.injuryType,
+    ...(row.specialization === "Спортивна реабілітація" ? ["Спортивні травми"] : []),
+  ])];
+}
+
 const FULL_NAMES: string[] = [
   "Олександр Ковальчук",
   "Марія Шевченко",
