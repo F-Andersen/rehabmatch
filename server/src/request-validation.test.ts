@@ -41,3 +41,11 @@ describe("photo request boundary", () => {
       .rejects.toMatchObject({ status: 400, code: "VALIDATION_ERROR" });
   });
 });
+
+it("preserves the validation error contract after the Zod upgrade", async () => {
+  const response = await request(createApp()).post("/api/v1/auth/login")
+    .set("Origin", env.clientOrigin).send({ email: "invalid-email", password: "x" });
+  expect(response.status).toBe(400);
+  expect(response.body.error.code).toBe("VALIDATION_ERROR");
+  expect(response.body.error.details.fieldErrors.email.length).toBeGreaterThan(0);
+});

@@ -12,7 +12,7 @@ test.beforeEach(async ({ page }) => {
 
 test("home does not request private portal or form chunks", async ({ page }) => {
   const html = readFileSync("client/dist/index.html", "utf8");
-  const entry = html.match(/src="(\/assets\/[^\"]+\.js)"/)?.[1];
+  const entry = html.match(/src="(\/assets\/[^"]+\.js)"/)?.[1];
   expect(entry).toBeTruthy();
   expect(statSync(`client/dist${entry}`).size).toBeLessThan(500_000);
   const scripts: string[] = [];
@@ -21,7 +21,7 @@ test("home does not request private portal or form chunks", async ({ page }) => 
   });
   await page.goto("/");
   await expect(page.getByRole("link", { name: "Контакти", exact: true }).first()).toBeVisible();
-  expect(scripts.some((url) => /(?:AdminPages|PatientPages|SpecialistPortalPages|LoginPage|RegisterPage|types)-/.test(url))).toBe(false);
+  expect(scripts.some((url) => /(?:AdminPages|PatientPages|SpecialistPortalPages|LoginPage|RegisterPage|types|schemas|coerce)-/.test(url))).toBe(false);
   expect(scripts.some((url) => /\/assets\/index-.*\.js/.test(url))).toBe(true);
 });
 

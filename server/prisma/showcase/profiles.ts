@@ -103,7 +103,7 @@ function parseCsv(): ShowcaseCsvRow[] {
   return lines.map((line, index) => {
     const columns = line.split(",");
     const [
-      demoId,
+      ,
       ,
       city,
       district,
@@ -153,7 +153,6 @@ export function loadShowcaseProfiles(): Array<ShowcaseCsvRow & { fullName: strin
   const rows = parseCsv();
   return rows.map((row, index) => {
     const fullName = FULL_NAMES[index] ?? `Спеціаліст ${row.showcaseId}`;
-    const slug = row.showcaseId.toLowerCase().replace("sc-", "sc-");
     const photoPath = `/images/specialists/sc-${String(index + 1).padStart(3, "0")}.webp`;
     return {
       ...row,

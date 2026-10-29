@@ -12,5 +12,10 @@ playwright-report
 e2e/artifacts
 client/public/images/uploads
 *.log
-*.dump
-*.backup
+backups/
+database-backups/
+data/
+pgdata/
+postgres-data/
+**/*.dump
+**/*.backup

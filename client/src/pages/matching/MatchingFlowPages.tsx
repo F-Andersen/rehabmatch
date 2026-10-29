@@ -22,7 +22,7 @@ import {
   SAATY_SCALE,
   type CriterionKey,
 } from "../../features/matching/criteria";
-import { matchingSearchSchema, type MatchingSearchFormValues } from "../../features/matching/schemas";
+import { matchingSearchSchema, type MatchingSearchFormValues, type MatchingSearchFormInput } from "../../features/matching/schemas";
 import { ApiError } from "../../lib/api";
 import { useAuth } from "../../features/auth/AuthProvider";
 
@@ -41,7 +41,7 @@ export function MatchingNewPage() {
     watch,
     setValue,
     formState: { errors, isSubmitting },
-  } = useForm<MatchingSearchFormValues>({
+  } = useForm<MatchingSearchFormInput, undefined, MatchingSearchFormValues>({
     resolver: zodResolver(matchingSearchSchema),
     defaultValues: {
       injuryTypeId: "",

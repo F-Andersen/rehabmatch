@@ -50,7 +50,7 @@ test("admin approves specialist then catalog lists profile", async ({ page, requ
   expect(publicBody.data.some((s: { id: string }) => s.id === row.id)).toBe(true);
 });
 
-test("patient DIRECT_WSM flow via API then UI history", async ({ page, request }) => {
+test("patient DIRECT_WSM flow via API then UI history", async ({ page }) => {
   const email = uniqueEmail("e2e-wsm");
   await registerPatient(page, email);
 

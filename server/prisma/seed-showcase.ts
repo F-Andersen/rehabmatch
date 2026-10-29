@@ -368,7 +368,7 @@ async function seedReviews(patientIds: string[]) {
   });
 }
 
-async function seedAppointments(patientIds: string[], password: string) {
+async function seedAppointments(patientIds: string[]) {
   const existing = await prisma.appointmentRequest.count();
   if (existing >= 28) {
     return existing;
@@ -508,7 +508,7 @@ async function main() {
   await seedSpecialists(password, maps);
   const patientIds = await seedPatients(password);
   await seedReviews(patientIds);
-  await seedAppointments(patientIds, password);
+  await seedAppointments(patientIds);
   await seedRecommendations(patientIds);
   await printSummary();
 }

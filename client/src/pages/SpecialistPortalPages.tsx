@@ -42,6 +42,7 @@ const profileFormSchema = z.object({
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
+type ProfileFormInput = z.input<typeof profileFormSchema>;
 
 function statusMessage(status: string | null | undefined) {
   switch (status) {
@@ -158,7 +159,7 @@ function SpecialistProfileEditForm() {
     watch,
     setValue,
     formState: { errors, isSubmitting },
-  } = useForm<ProfileFormValues>({
+  } = useForm<ProfileFormInput, undefined, ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
       fullName: "",
@@ -557,7 +558,7 @@ function CheckboxGroup({
   label: string;
   items: { id: string; name: string }[];
   name: "specializationIds" | "injuryTypeIds" | "formatIds";
-  register: ReturnType<typeof useForm<ProfileFormValues>>["register"];
+  register: ReturnType<typeof useForm<ProfileFormInput, undefined, ProfileFormValues>>["register"];
   error?: string;
 }) {
   return (

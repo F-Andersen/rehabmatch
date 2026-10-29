@@ -14,3 +14,4 @@ export const matchingSearchSchema = z.object({
 });
 
 export type MatchingSearchFormValues = z.infer<typeof matchingSearchSchema>;
+export type MatchingSearchFormInput = z.input<typeof matchingSearchSchema>;

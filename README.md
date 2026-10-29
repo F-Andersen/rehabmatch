@@ -10,7 +10,7 @@
 
 ## Вимоги
 
-- Node.js **20+**, npm **10+**
+- Node.js **20.19+ / 22.13+ / 24+**, npm **10+** (Docker використовує Node 22)
 - Docker Desktop (PostgreSQL)
 - Windows: PowerShell; для ланцюжків команд використовуйте `;` замість `&&`
 
@@ -49,12 +49,14 @@ npm run dev
 | `npm run dev` | Client + server |
 | `npm run build` | Production build |
 | `npm run typecheck` | TypeScript |
+| `npm run lint` | ESLint для TypeScript/JavaScript і правил React Hooks, без попереджень |
 | `npm run test:build` | Production-збірка й перевірки завантаження маршрутів, відмови мережі та відновлення |
 | `npm test` | Vitest (server) |
 | `npm run e2e` | Playwright (ізольована БД `rehabmatch_e2e`, піднімає API+client) |
 | `npm run e2e:prepare` | Міграції + seed на E2E БД (див. `.env.e2e.example`) |
 | `npm run e2e:visual` | Smoke-скріншоти → `e2e/artifacts/visual-qa/` |
 | `npm run bench:recommendation` | Benchmark алгоритму (синтетика) |
+| `npm run bench:http` | Реальні HTTP-запити на 500 синтетичних профілях в окремій локальній БД |
 | `npm run openapi:lint` | Валідація OpenAPI |
 | `npm run db:validate` | `prisma validate` |
 | `npm run audit:test-data -w server` | Звіт тестових користувачів у БД |
@@ -100,6 +102,24 @@ Frontend: `http://localhost:5184`, API: `http://localhost:3021`. Портрет�
 3. `npm run e2e` — global setup створить БД (за потреби), migrate, seed; API з `REHABMATCH_E2E=1` (auth quota для тестів; production ліміт не змінюється).
 4. Демо вручну: `npm run dev` + БД **`rehabmatch`** — E2E її не очищає.
 5. E2E використовує порти `5174`/`3011` за прикладом env. Не направляйте тестові мутації на презентаційну БД; `npm run e2e:showcase` призначена для перегляду й smoke-перевірок showcase.
+
+## Перевірка залежностей
+
+Після оновлення залежностей запускайте `npm audit`, `npm run lint`, `npm run typecheck`, `npm test`, `npm run test:build` і `npm run e2e` у відповідній тестовій БД. Zod 4 використовується разом із сумісним resolver форм; вхідні значення форм і перевірені числові результати мають окремі типи. Ліміти HTTP-тіла та рольові перевірки збережені.
+
+Prisma CLI 6 належить кореневим devDependencies монорепозиторію. Override `deepmerge-ts` 8.0.2 виправляє транзитивну залежність CLI без міграції Prisma на іншу major-версію. Регресійні тести перевіряють gzip/deflate у дочірньому процесі, раннє відхилення завеликих масивів, рекурсивні графи та реальне завантаження конфігурації Prisma. Після зміни Prisma або override повторно виконайте `npm run db:validate`, `npm run db:generate` і тести сумісності.
+
+## HTTP-бенчмарк на 500 профілях
+
+Скопіюйте `.env.benchmark.example` у приватний `.env.benchmark` та задайте локальні облікові дані PostgreSQL у `BENCHMARK_DATABASE_URL`. Запустіть `npm run bench:http`. Користувач БД має мати право створити **rehabmatch_benchmark** або ця БД повинна вже існувати.
+
+Команда мігрує та повторно наповнює тільки цю окрему БД. Дозволені лише localhost/127.0.0.1/IPv6 loopback і схема public; demo/showcase/E2E та віддалені адреси відхиляються. Наявність користувачів без домену `benchmark.example.test` також зупиняє очищення.
+
+Вимірюються каталог, DIRECT_WSM і AHP_PAIRWISE: 10 прогрівальних і 50 виміряних запитів на кожний сценарій, послідовно. Усі 500 профілів проходять фільтри; відповідь містить top-20. Час включає HTTP, сесію, БД, розрахунок/збереження рекомендації й читання JSON. Створення нового пошукового запиту перед кожною рекомендацією виключене з виміру, щоб не використовувати повторно вже створену рекомендацію.
+
+Результат: локальний `qa-artifacts/http-benchmark.json` із конфігурацією середовища, median/p95/p99 та перевіркою орієнтирів p95 < 500 мс для каталогу й < 1500 мс для рекомендацій. Це локальний послідовний вимір, а не навантажувальний тест чи час відповіді публічного сервера. Звіт, паролі та жива БД не комітяться.
+
+Контрольний прогін 2026-10-29: Ryzen 5 5600X, 32 ГіБ RAM, Windows/Node 24.14.1, PostgreSQL 16.13 у Docker, Prisma 6.19.3. p95: каталог 17,5 мс; DIRECT_WSM 82,5 мс; AHP_PAIRWISE 82,1 мс. Усі три орієнтири виконані в цьому локальному середовищі.
 
 ## Завантаження сторінок і production-збірка
 

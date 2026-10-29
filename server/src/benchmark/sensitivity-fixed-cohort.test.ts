@@ -42,7 +42,6 @@ describe("M7 fixed cohort sensitivity", () => {
     expect(price.ranked.length).toBe(5);
     expect(experience.ranked.length).toBe(5);
 
-    const equalTop = equal.ranked[0]!.specialistId;
     const priceTop = price.ranked[0]!.specialistId;
     const expTop = experience.ranked[0]!.specialistId;
 

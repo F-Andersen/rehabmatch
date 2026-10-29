@@ -4,6 +4,7 @@ node_modules/
 !.env.example
 !.env.e2e.example
 !.env.showcase.example
+!.env.benchmark.example
 client/dist/
 server/dist/
 build/

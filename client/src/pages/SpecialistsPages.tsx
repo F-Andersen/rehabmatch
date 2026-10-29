@@ -412,7 +412,7 @@ function SpecialistReviewSection({ specialistId }: { specialistId: string }) {
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<ReviewFormValues>({
+  } = useForm<z.input<typeof reviewFormSchema>, undefined, ReviewFormValues>({
     resolver: zodResolver(reviewFormSchema),
     defaultValues: { rating: 5, comment: "" },
   });
